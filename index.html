@@ -604,6 +604,18 @@
             100% { transform: rotate(360deg); }
         }
 
+        .data-indicator {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+        }
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .login-card {
@@ -830,114 +842,11 @@
         </nav>
 
         <div class="main-content">
+            <div class="data-indicator">
+                💾 All data is automatically saved and will persist between sessions
+            </div>
+
             <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalVisits">0</div>
-                    <div class="stat-label">Total Visits</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="todayVisits">0</div>
-                    <div class="stat-label">Today's Visits</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="editableCount">0</div>
-                    <div class="stat-label">Editable Visits</div>
-                </div>
-            </div>
-
-            <div id="locationRequirement" class="location-requirement" style="display: none;">
-                📍 Location access is required to proceed. Please enable location sharing and refresh the page.
-            </div>
-
-            <div class="content-card" id="visitEntryCard">
-                <div class="card-header">New Visit Entry</div>
-                <div class="card-body">
-                    <div class="camera-section">
-                        <div class="video-container">
-                            <video id="video" autoplay muted playsinline></video>
-                            <canvas id="canvas"></canvas>
-                        </div>
-                        <div class="camera-controls">
-                            <button class="camera-btn btn-start" onclick="startCamera()">Start Camera</button>
-                            <button class="camera-btn btn-capture" onclick="capturePhoto()">Capture Photo</button>
-                        </div>
-                        <div class="photo-preview" id="photoPreview"></div>
-                    </div>
-
-                    <form id="visitForm">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Person Name</label>
-                                <input type="text" class="form-input" id="personName" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Mobile Number</label>
-                                <input type="tel" class="form-input" id="mobileNumber" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Company Name</label>
-                                <input type="text" class="form-input" id="companyName" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Designation</label>
-                                <input type="text" class="form-input" id="designation" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Meeting Purpose</label>
-                                <input type="text" class="form-input" id="meetingPurpose" placeholder="Brief description">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-submit" id="submitBtn" disabled>Submit Visit</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="content-card">
-                <div class="card-header">My Visits</div>
-                <div class="card-body">
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Person</th>
-                                    <th>Mobile</th>
-                                    <th>Company</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="partnerVisitsTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="dashboard" id="adminDashboard">
-        <nav class="navbar">
-            <div class="mobile-nav">
-                <button class="back-btn" id="adminBackBtn" onclick="handleBackNavigation()" style="display: none;">
-                    ← <span class="nav-title" id="adminNavTitle">Dashboard</span>
-                </button>
-                <div class="nav-brand">Admin Dashboard</div>
-            </div>
-            <div class="nav-user">
-                <div class="user-info">
-                    <span>Administrator</span>
-                </div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-        </nav>
-
-        <div class="main-content">
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-value" id="adminTotalVisits">0</div>
-                    <div class="stat-label">Total Visits</div>
-                </div>
                 <div class="stat-card">
                     <div class="stat-value" id="adminTotalPartners">0</div>
                     <div class="stat-label">Registered Partners</div>
@@ -1013,6 +922,59 @@
             username: 'admin@valotech',
             password: 'adminpass@#123'
         };
+
+        // Storage Management Functions
+        function saveToStorage() {
+            try {
+                const data = {
+                    visits: visits,
+                    partners: partners,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('visitManagementData', JSON.stringify(data));
+                console.log('Data saved to localStorage');
+            } catch (error) {
+                console.error('Failed to save data to localStorage:', error);
+                showNotification('Warning: Data could not be saved automatically', 'warning');
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const savedData = localStorage.getItem('visitManagementData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    visits = data.visits || [];
+                    partners = data.partners || [];
+                    
+                    // Convert string dates back to Date objects where necessary
+                    visits.forEach(visit => {
+                        if (typeof visit.createdAt === 'string') {
+                            visit.createdAt = new Date(visit.createdAt);
+                        }
+                    });
+                    
+                    console.log(`Loaded ${visits.length} visits and ${partners.length} partners from storage`);
+                    return true;
+                } else {
+                    console.log('No saved data found');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Failed to load data from localStorage:', error);
+                showNotification('Warning: Could not load saved data', 'warning');
+                return false;
+            }
+        }
+
+        function clearStorage() {
+            try {
+                localStorage.removeItem('visitManagementData');
+                console.log('Storage cleared');
+            } catch (error) {
+                console.error('Failed to clear storage:', error);
+            }
+        }
 
         // Mobile navigation functions
         function isMobileDevice() {
@@ -1160,7 +1122,8 @@
             };
             
             partners.push(newPartner);
-            showNotification('Account created successfully!');
+            saveToStorage(); // Save immediately after adding partner
+            showNotification('Account created successfully! Data saved.');
             showLogin();
             document.getElementById('partnerRegisterForm').reset();
         });
@@ -1213,6 +1176,7 @@
                     const partner = partners.find(p => p.username === user.username);
                     if (partner) {
                         partner.lastActivity = new Date().toISOString();
+                        saveToStorage(); // Save updated activity
                     }
                 } else {
                     document.getElementById('adminDashboard').classList.add('active');
@@ -1222,7 +1186,7 @@
                 updateStats();
                 renderTables();
                 hideLoading();
-                showNotification(`Welcome ${user.username}!`);
+                showNotification(`Welcome back ${user.username}!`);
             }, 1000);
         }
 
@@ -1468,6 +1432,9 @@
                     partner.lastActivity = new Date().toISOString();
                 }
                 
+                // Save to storage immediately
+                saveToStorage();
+                
                 // Reset form
                 this.reset();
                 document.getElementById('photoPreview').innerHTML = '';
@@ -1477,7 +1444,7 @@
                 updateStats();
                 renderTables();
                 hideLoading();
-                showNotification('Visit submitted successfully!');
+                showNotification('Visit submitted successfully and saved!');
             }, 1500);
         });
 
@@ -1692,10 +1659,6 @@
                     </div>
                     <form id="editVisitForm" style="padding: 24px;">
                         <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Person Name</label>
-                            <input type="text" id="editPersonName" value="${visit.personName}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
-                        </div>
-                        <div style="margin-bottom: 16px;">
                             <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Mobile Number</label>
                             <input type="tel" id="editMobileNumber" value="${visit.mobileNumber}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
                         </div>
@@ -1761,10 +1724,13 @@
                 visit.meetingPurpose = newMeetingPurpose;
                 visit.lastModified = new Date().toISOString();
                 
+                // Save changes immediately
+                saveToStorage();
+                
                 closeEditModal();
                 renderTables();
                 updateStats();
-                showNotification('Visit updated successfully!');
+                showNotification('Visit updated and saved successfully!');
             };
         }
 
@@ -1789,9 +1755,12 @@
                     partner.totalVisits = visits.filter(v => v.partner === partner.username).length;
                 });
                 
+                // Save changes immediately
+                saveToStorage();
+                
                 renderTables();
                 updateStats();
-                showNotification('Visit deleted successfully!');
+                showNotification('Visit deleted and saved successfully!');
             }
         }
 
@@ -1950,6 +1919,15 @@
 
         // Initialize the application
         window.addEventListener('load', function() {
+            // Load data from storage first
+            const dataLoaded = loadFromStorage();
+            
+            if (dataLoaded) {
+                showNotification(`Loaded ${visits.length} visits and ${partners.length} partners from storage`, 'success');
+            } else {
+                showNotification('Starting fresh - no previous data found', 'success');
+            }
+            
             updateStats();
             renderTables();
             
@@ -1967,6 +1945,19 @@
             }
         });
 
+        // Auto-save data periodically (every 30 seconds)
+        setInterval(() => {
+            if (visits.length > 0 || partners.length > 0) {
+                saveToStorage();
+                console.log('Auto-saved data');
+            }
+        }, 30000);
+
+        // Save data before page unload
+        window.addEventListener('beforeunload', function() {
+            saveToStorage();
+        });
+
         // Handle orientation change on mobile
         window.addEventListener('orientationchange', function() {
             setTimeout(updateStats, 100);
@@ -1976,11 +1967,126 @@
         window.addEventListener('popstate', function(event) {
             if (userRole) {
                 event.preventDefault();
-                if (confirm('Are you sure you want to logout?')) {
+                if (confirm('Are you sure you want to logout? All data is saved.')) {
                     logout();
                 }
             }
         });
     </script>
 </body>
-</html>
+</html>;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Person Name</label>
+                            <input type="text" id="editPersonName" value="${visit.personName}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
+                        </div>
+                        <div style="margin-bottom: 16px
+                    <div class="stat-value" id="totalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayVisits">0</div>
+                    <div class="stat-label">Today's Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="editableCount">0</div>
+                    <div class="stat-label">Editable Visits</div>
+                </div>
+            </div>
+
+            <div id="locationRequirement" class="location-requirement" style="display: none;">
+                📍 Location access is required to proceed. Please enable location sharing and refresh the page.
+            </div>
+
+            <div class="content-card" id="visitEntryCard">
+                <div class="card-header">New Visit Entry</div>
+                <div class="card-body">
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video id="video" autoplay muted playsinline></video>
+                            <canvas id="canvas"></canvas>
+                        </div>
+                        <div class="camera-controls">
+                            <button class="camera-btn btn-start" onclick="startCamera()">Start Camera</button>
+                            <button class="camera-btn btn-capture" onclick="capturePhoto()">Capture Photo</button>
+                        </div>
+                        <div class="photo-preview" id="photoPreview"></div>
+                    </div>
+
+                    <form id="visitForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Person Name</label>
+                                <input type="text" class="form-input" id="personName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mobile Number</label>
+                                <input type="tel" class="form-input" id="mobileNumber" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Company Name</label>
+                                <input type="text" class="form-input" id="companyName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Designation</label>
+                                <input type="text" class="form-input" id="designation" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Meeting Purpose</label>
+                                <input type="text" class="form-input" id="meetingPurpose" placeholder="Brief description">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit" id="submitBtn" disabled>Submit Visit</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">My Visits</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Person</th>
+                                    <th>Mobile</th>
+                                    <th>Company</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="partnerVisitsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="adminDashboard">
+        <nav class="navbar">
+            <div class="mobile-nav">
+                <button class="back-btn" id="adminBackBtn" onclick="handleBackNavigation()" style="display: none;">
+                    ← <span class="nav-title" id="adminNavTitle">Dashboard</span>
+                </button>
+                <div class="nav-brand">Admin Dashboard</div>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span>Administrator</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="data-indicator">
+                💾 All data is automatically saved and persisted across sessions
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="adminTotalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
