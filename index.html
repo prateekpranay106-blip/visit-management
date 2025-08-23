@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 420px;
+            margin: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            text-align: center;
+            padding: 24px 16px;
+        }
+
+        .login-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 0.85rem;
+        }
+
+        .login-body {
+            padding: 24px 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px; /* Prevents zoom on iOS */
+            transition: all 0.3s ease;
+            background: #ffffff;
+            -webkit-appearance: none;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .form-button:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .form-button:active {
+            transform: translateY(0px);
+        }
+
+        .form-link {
+            text-align: center;
+            margin-top: 16px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .form-link a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .form-link a:hover {
+            text-decoration: underline;
+        }
+
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .mobile-nav {
+            display: none;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #2563eb;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #f1f5f9;
+            color: #1d4ed8;
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            text-align: center;
+            flex: 1;
+        }
+
+        .nav-brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #374151;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .location-display {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+        }
+
+        .main-content {
+            padding: 20px 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .camera-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .video-container {
+            display: inline-block;
+            border: 3px solid #e5e7eb;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #f8fafc;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #video {
+            width: 100%;
+            max-width: 320px;
+            height: 240px;
+            display: block;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .camera-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+        }
+
+        .btn-capture {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+        }
+
+        .camera-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .photo-preview {
+            margin-top: 16px;
+        }
+
+        .photo-preview img {
+            max-width: 200px;
+            border-radius: 12px;
+            border: 3px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+            font-size: 0.9rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #374151;
+            font-size: 0.8rem;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .status-editable {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-locked {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-view {
+            background: #059669;
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateY(-100px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        .notification.show {
+            transform: translateY(0);
+        }
+
+        .location-requirement {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #92400e;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .login-card {
+                margin: 5px;
+                border-radius: 12px;
+            }
+
+            .login-body {
+                padding: 20px 16px;
+            }
+
+            .navbar {
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 16px;
+                padding: 12px 16px;
+                position: sticky;
+                top: 0;
+            }
+
+            .mobile-nav {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex: 1;
+            }
+
+            .nav-brand {
+                display: none;
+            }
+
+            .nav-user {
+                justify-content: flex-end;
+                gap: 8px;
+                flex-wrap: nowrap;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .location-display {
+                max-width: 120px;
+                font-size: 0.65rem;
+                padding: 4px 8px;
+            }
+
+            .logout-btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            .main-content {
+                padding: 16px 12px;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px 12px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .card-body {
+                padding: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .camera-controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .camera-btn {
+                width: 200px;
+            }
+
+            #video {
+                max-width: 100%;
+                width: 280px;
+                height: 210px;
+            }
+
+            .data-table {
+                font-size: 0.8rem;
+                min-width: 600px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+            }
+
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            .btn-small {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+
+            /* Modal responsive adjustments */
+            .loading-overlay div[style*="background: white"] {
+                margin: 10px !important;
+                border-radius: 12px !important;
+                max-width: calc(100vw - 20px) !important;
+            }
+        }
+
+        /* Landscape phone optimizations */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .stats-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            #video {
+                width: 240px;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Visit Management System</h1>
+                <p>Professional visit tracking and management</p>
+            </div>
+            
+            <div class="login-body">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('partner')">Partner</button>
+                    <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+                </div>
+
+                <div class="form-section active" id="partnerSection">
+                    <div id="partnerLogin">
+                        <h2 class="form-title">Partner Login</h2>
+                        <form id="partnerLoginForm">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" class="form-input" id="partnerUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-input" id="partnerPassword" required>
+                            </div>
+                            <button type="submit" class="form-button">Sign In</button>
+                        </form>
+                        <div class="form-link">
+                            Don't have an account? <a onclick="showRegister()">Create Account</a>
+                        </div>
+                    </div>
+
+                    <div id="partnerRegister" style="display: none;">
+                        <h2 class="form-title">Create Account</h2>
+                        <form id="partnerRegisterForm">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" class="form-input" id="regUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-input" id="regPassword" required>
+                            </div>
+                            <button type="submit" class="form-button">Create Account</button>
+                        </form>
+                        <div class="form-link">
+                            Already have an account? <a onclick="showLogin()">Sign In</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section" id="adminSection">
+                    <h2 class="form-title">Admin Login</h2>
+                    <form id="adminLoginForm">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-input" id="adminUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-input" id="adminPassword" required>
+                        </div>
+                        <button type="submit" class="form-button">Admin Sign In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="partnerDashboard">
+        <nav class="navbar">
+            <div class="mobile-nav">
+                <button class="back-btn" id="partnerBackBtn" onclick="handleBackNavigation()" style="display: none;">
+                    ← <span class="nav-title" id="partnerNavTitle">Dashboard</span>
+                </button>
+                <div class="nav-brand">Partner Dashboard</div>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span id="partnerName">Partner</span>
+                </div>
+                <div class="location-display" id="locationDisplay">Getting location...</div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayVisits">0</div>
+                    <div class="stat-label">Today's Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="editableCount">0</div>
+                    <div class="stat-label">Editable Visits</div>
+                </div>
+            </div>
+
+            <div id="locationRequirement" class="location-requirement" style="display: none;">
+                📍 Location access is required to proceed. Please enable location sharing and refresh the page.
+            </div>
+
+            <div class="content-card" id="visitEntryCard">
+                <div class="card-header">New Visit Entry</div>
+                <div class="card-body">
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video id="video" autoplay muted playsinline></video>
+                            <canvas id="canvas"></canvas>
+                        </div>
+                        <div class="camera-controls">
+                            <button class="camera-btn btn-start" onclick="startCamera()">Start Camera</button>
+                            <button class="camera-btn btn-capture" onclick="capturePhoto()">Capture Photo</button>
+                        </div>
+                        <div class="photo-preview" id="photoPreview"></div>
+                    </div>
+
+                    <form id="visitForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Person Name</label>
+                                <input type="text" class="form-input" id="personName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mobile Number</label>
+                                <input type="tel" class="form-input" id="mobileNumber" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Company Name</label>
+                                <input type="text" class="form-input" id="companyName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Designation</label>
+                                <input type="text" class="form-input" id="designation" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Meeting Purpose</label>
+                                <input type="text" class="form-input" id="meetingPurpose" placeholder="Brief description">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit" id="submitBtn" disabled>Submit Visit</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">My Visits</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Person</th>
+                                    <th>Mobile</th>
+                                    <th>Company</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="partnerVisitsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="adminDashboard">
+        <nav class="navbar">
+            <div class="mobile-nav">
+                <button class="back-btn" id="adminBackBtn" onclick="handleBackNavigation()" style="display: none;">
+                    ← <span class="nav-title" id="adminNavTitle">Dashboard</span>
+                </button>
+                <div class="nav-brand">Admin Dashboard</div>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span>Administrator</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="adminTotalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="adminTotalPartners">0</div>
+                    <div class="stat-label">Registered Partners</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="adminTodayVisits">0</div>
+                    <div class="stat-label">Today's Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="adminCompanies">0</div>
+                    <div class="stat-label">Companies</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">Registered Partners</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Registration Date</th>
+                                    <th>Total Visits</th>
+                                    <th>Last Activity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="partnersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">All Visits</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Partner</th>
+                                    <th>Date</th>
+                                    <th>Person</th>
+                                    <th>Mobile</th>
+                                    <th>Company</th>
+                                    <th>Designation</th>
+                                    <th>Location</th>
+                                    <th>Photo</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminVisitsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let userRole = null;
+        let visits = [];
+        let partners = [];
+        let capturedPhoto = null;
+        let currentLocation = null;
+        let cameraStream = null;
+        let locationGranted = false;
+        let navigationStack = [];
+
+        const ADMIN_CREDENTIALS = {
+            username: 'admin@valotech',
+            password: 'adminpass@#123'
+        };
+
+        // Mobile navigation functions
+        function isMobileDevice() {
+            return window.innerWidth <= 768;
+        }
+
+        function updateMobileNavigation() {
+            if (!isMobileDevice()) return;
+
+            const partnerBackBtn = document.getElementById('partnerBackBtn');
+            const adminBackBtn = document.getElementById('adminBackBtn');
+            const partnerNavTitle = document.getElementById('partnerNavTitle');
+            const adminNavTitle = document.getElementById('adminNavTitle');
+
+            if (userRole === 'partner') {
+                if (navigationStack.length > 0) {
+                    partnerBackBtn.style.display = 'flex';
+                    partnerNavTitle.textContent = navigationStack[navigationStack.length - 1].title;
+                } else {
+                    partnerBackBtn.style.display = 'none';
+                    partnerNavTitle.textContent = 'Partner Dashboard';
+                }
+            } else if (userRole === 'admin') {
+                if (navigationStack.length > 0) {
+                    adminBackBtn.style.display = 'flex';
+                    adminNavTitle.textContent = navigationStack[navigationStack.length - 1].title;
+                } else {
+                    adminBackBtn.style.display = 'none';
+                    adminNavTitle.textContent = 'Admin Dashboard';
+                }
+            }
+        }
+
+        function pushNavigation(title, onBack) {
+            navigationStack.push({ title, onBack });
+            updateMobileNavigation();
+        }
+
+        function popNavigation() {
+            if (navigationStack.length > 0) {
+                const nav = navigationStack.pop();
+                updateMobileNavigation();
+                if (nav.onBack) {
+                    nav.onBack();
+                }
+                return nav;
+            }
+            return null;
+        }
+
+        function handleBackNavigation() {
+            popNavigation();
+        }
+
+        function clearNavigation() {
+            navigationStack = [];
+            updateMobileNavigation();
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showLoading(message = 'Loading...') {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.id = 'loadingOverlay';
+            overlay.innerHTML = `
+                <div class="spinner"></div>
+                ${message}
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                document.body.removeChild(overlay);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Section').classList.add('active');
+        }
+
+        function showRegister() {
+            document.getElementById('partnerLogin').style.display = 'none';
+            document.getElementById('partnerRegister').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('partnerLogin').style.display = 'block';
+            document.getElementById('partnerRegister').style.display = 'none';
+        }
+
+        document.getElementById('partnerRegisterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            
+            if (!username || !password) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (username.length < 3) {
+                showNotification('Username must be at least 3 characters long', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('Password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            if (partners.find(p => p.username === username)) {
+                showNotification('Username already exists', 'error');
+                return;
+            }
+            
+            const newPartner = {
+                id: Date.now(),
+                username: username,
+                password: password,
+                registrationDate: new Date().toISOString(),
+                totalVisits: 0,
+                lastActivity: new Date().toISOString()
+            };
+            
+            partners.push(newPartner);
+            showNotification('Account created successfully!');
+            showLogin();
+            document.getElementById('partnerRegisterForm').reset();
+        });
+
+        document.getElementById('partnerLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('partnerUsername').value.trim();
+            const password = document.getElementById('partnerPassword').value.trim();
+            
+            if (!username || !password) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            const partner = partners.find(p => p.username === username && p.password === password);
+            
+            if (partner) {
+                login(partner, 'partner');
+            } else {
+                showNotification('Invalid username or password', 'error');
+            }
+        });
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value.trim();
+            
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                login({ username: 'admin' }, 'admin');
+            } else {
+                showNotification('Invalid admin credentials', 'error');
+            }
+        });
+
+        function login(user, role) {
+            showLoading('Signing you in...');
+            
+            setTimeout(() => {
+                currentUser = user;
+                userRole = role;
+                
+                document.getElementById('loginContainer').style.display = 'none';
+                
+                if (role === 'partner') {
+                    document.getElementById('partnerDashboard').classList.add('active');
+                    document.getElementById('partnerName').textContent = user.username;
+                    getCurrentLocation();
+                    
+                    const partner = partners.find(p => p.username === user.username);
+                    if (partner) {
+                        partner.lastActivity = new Date().toISOString();
+                    }
+                } else {
+                    document.getElementById('adminDashboard').classList.add('active');
+                }
+                
+                clearNavigation(); // Reset navigation stack
+                updateStats();
+                renderTables();
+                hideLoading();
+                showNotification(`Welcome ${user.username}!`);
+            }, 1000);
+        }
+
+        function logout() {
+            currentUser = null;
+            userRole = null;
+            locationGranted = false;
+            clearNavigation(); // Clear navigation stack
+            
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('partnerDashboard').classList.remove('active');
+            document.getElementById('adminDashboard').classList.remove('active');
+            
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            
+            // Close any open modals
+            const modals = document.querySelectorAll('[id$="Modal"]');
+            modals.forEach(modal => modal.remove());
+            
+            document.querySelectorAll('form').forEach(form => form.reset());
+            document.getElementById('photoPreview').innerHTML = '';
+            capturedPhoto = null;
+            
+            // Reset submit button
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submit Visit';
+        }
+
+        function getCurrentLocation() {
+            showLoading('Getting your location...');
+            
+            if (!navigator.geolocation) {
+                hideLoading();
+                showNotification('Location is not supported by this browser', 'error');
+                showLocationRequirement();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    currentLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    locationGranted = true;
+                    
+                    document.getElementById('locationDisplay').textContent = 
+                        `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                    
+                    document.getElementById('locationRequirement').style.display = 'none';
+                    document.getElementById('visitEntryCard').style.display = 'block';
+                    updateSubmitButton();
+                    
+                    hideLoading();
+                    showNotification('Location acquired successfully!');
+                },
+                function(error) {
+                    hideLoading();
+                    let errorMessage = 'Location access denied';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location access denied. Please enable location sharing.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out.';
+                            break;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                    showLocationRequirement();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function showLocationRequirement() {
+            document.getElementById('locationRequirement').style.display = 'block';
+            document.getElementById('visitEntryCard').style.display = 'none';
+            locationGranted = false;
+            updateSubmitButton();
+        }
+
+        function startCamera() {
+            if (!locationGranted) {
+                showNotification('Location is required before starting camera', 'warning');
+                return;
+            }
+
+            showLoading('Starting camera...');
+
+            // Determine if this is likely a mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Camera constraints - prefer front camera on mobile
+            const constraints = {
+                video: {
+                    width: { ideal: 320 },
+                    height: { ideal: 240 },
+                    facingMode: isMobile ? 'user' : 'environment' // 'user' = front camera, 'environment' = back camera
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(function(stream) {
+                    cameraStream = stream;
+                    document.getElementById('video').srcObject = stream;
+                    hideLoading();
+                    showNotification('Camera started successfully');
+                })
+                .catch(function(err) {
+                    hideLoading();
+                    console.log('Camera error:', err);
+                    
+                    // Try fallback constraints if the preferred camera fails
+                    if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+                        const fallbackConstraints = {
+                            video: {
+                                width: { ideal: 320 },
+                                height: { ideal: 240 }
+                            }
+                        };
+                        
+                        navigator.mediaDevices.getUserMedia(fallbackConstraints)
+                            .then(function(stream) {
+                                cameraStream = stream;
+                                document.getElementById('video').srcObject = stream;
+                                showNotification('Camera started (fallback mode)');
+                            })
+                            .catch(function() {
+                                showNotification('Camera access denied or unavailable', 'error');
+                            });
+                    } else {
+                        showNotification('Camera access denied or unavailable', 'error');
+                    }
+                });
+        }
+
+        function capturePhoto() {
+            if (!locationGranted) {
+                showNotification('Location is required before capturing photo', 'warning');
+                return;
+            }
+
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            
+            if (!video.videoWidth) {
+                showNotification('Please start camera first', 'error');
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            
+            capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
+            
+            document.getElementById('photoPreview').innerHTML = `
+                <p style="color: #059669; font-weight: 600; margin-bottom: 8px;">📷 Photo captured successfully</p>
+                <img src="${capturedPhoto}" alt="Captured photo">
+            `;
+            
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            updateSubmitButton();
+            showNotification('Photo captured successfully!');
+        }
+
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            const hasLocation = locationGranted && currentLocation;
+            const hasPhoto = capturedPhoto !== null;
+            
+            if (hasLocation && hasPhoto) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Visit';
+                submitBtn.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+            } else {
+                submitBtn.disabled = true;
+                if (!hasLocation) {
+                    submitBtn.textContent = 'Location Required';
+                    submitBtn.style.background = '#f59e0b';
+                } else if (!hasPhoto) {
+                    submitBtn.textContent = 'Photo Required';
+                    submitBtn.style.background = '#f59e0b';
+                }
+            }
+        }
+
+        document.getElementById('visitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!locationGranted || !currentLocation) {
+                showNotification('Location is required to submit visit', 'error');
+                return;
+            }
+            
+            if (!capturedPhoto) {
+                showNotification('Photo is required to submit visit', 'error');
+                return;
+            }
+
+            showLoading('Submitting visit...');
+            
+            setTimeout(() => {
+                const visit = {
+                    id: Date.now(),
+                    partner: currentUser.username,
+                    date: new Date().toISOString(),
+                    personName: document.getElementById('personName').value.trim(),
+                    mobileNumber: document.getElementById('mobileNumber').value.trim(),
+                    companyName: document.getElementById('companyName').value.trim(),
+                    designation: document.getElementById('designation').value.trim(),
+                    meetingPurpose: document.getElementById('meetingPurpose').value.trim(),
+                    location: currentLocation,
+                    photo: capturedPhoto,
+                    createdAt: new Date()
+                };
+                
+                visits.push(visit);
+                
+                // Update partner stats
+                const partner = partners.find(p => p.username === currentUser.username);
+                if (partner) {
+                    partner.totalVisits = visits.filter(v => v.partner === currentUser.username).length;
+                    partner.lastActivity = new Date().toISOString();
+                }
+                
+                // Reset form
+                this.reset();
+                document.getElementById('photoPreview').innerHTML = '';
+                capturedPhoto = null;
+                updateSubmitButton();
+                
+                updateStats();
+                renderTables();
+                hideLoading();
+                showNotification('Visit submitted successfully!');
+            }, 1500);
+        });
+
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayVisits = visits.filter(v => new Date(v.date).toDateString() === today);
+            
+            if (userRole === 'partner') {
+                const userVisits = visits.filter(v => v.partner === currentUser.username);
+                const editableVisits = userVisits.filter(v => canEdit(v.createdAt));
+                
+                document.getElementById('totalVisits').textContent = userVisits.length;
+                document.getElementById('todayVisits').textContent = todayVisits.filter(v => v.partner === currentUser.username).length;
+                document.getElementById('editableCount').textContent = editableVisits.length;
+            } else if (userRole === 'admin') {
+                const uniqueCompanies = [...new Set(visits.map(v => v.companyName))];
+                
+                document.getElementById('adminTotalVisits').textContent = visits.length;
+                document.getElementById('adminTotalPartners').textContent = partners.length;
+                document.getElementById('adminTodayVisits').textContent = todayVisits.length;
+                document.getElementById('adminCompanies').textContent = uniqueCompanies.length;
+            }
+        }
+
+        function canEdit(createdAt) {
+            const now = new Date();
+            const created = new Date(createdAt);
+            const diffHours = (now - created) / (1000 * 60 * 60);
+            return diffHours <= 2;
+        }
+
+        function renderTables() {
+            if (userRole === 'partner') {
+                renderPartnerVisits();
+            } else if (userRole === 'admin') {
+                renderAdminTables();
+            }
+        }
+
+        function renderPartnerVisits() {
+            const userVisits = visits.filter(v => v.partner === currentUser.username);
+            const tbody = document.getElementById('partnerVisitsTable');
+            
+            if (userVisits.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">
+                            No visits recorded yet. Create your first visit above!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = userVisits.map(visit => `
+                <tr>
+                    <td>${new Date(visit.date).toLocaleDateString()}</td>
+                    <td>${visit.personName}</td>
+                    <td>${visit.mobileNumber}</td>
+                    <td>${visit.companyName}</td>
+                    <td id="partner-location-${visit.id}">
+                        ${visit.location ? `${visit.location.lat.toFixed(3)}, ${visit.location.lng.toFixed(3)}` : 'N/A'}
+                    </td>
+                    <td>
+                        <span class="status-badge ${canEdit(visit.createdAt) ? 'status-editable' : 'status-locked'}">
+                            ${canEdit(visit.createdAt) ? 'Editable' : 'Locked'}
+                        </span>
+                    </td>
+                    <td>
+                        ${canEdit(visit.createdAt) ? 
+                            `<button class="btn-small btn-edit" onclick="editVisit(${visit.id})">Edit</button>` : 
+                            '<span style="color: #9ca3af;">-</span>'
+                        }
+                        <button class="btn-small btn-view" onclick="viewPhoto(${visit.id})">View Photo</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Load location names
+            userVisits.forEach(visit => {
+                if (visit.location) {
+                    getLocationName(visit.location.lat, visit.location.lng, `partner-location-${visit.id}`);
+                }
+            });
+        }
+
+        function renderAdminTables() {
+            // Render partners table
+            const partnersTable = document.getElementById('partnersTable');
+            
+            if (partners.length === 0) {
+                partnersTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #64748b; padding: 20px;">
+                            No partners registered yet.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                partnersTable.innerHTML = partners.map(partner => `
+                    <tr>
+                        <td>${partner.username}</td>
+                        <td>${new Date(partner.registrationDate).toLocaleDateString()}</td>
+                        <td>${partner.totalVisits}</td>
+                        <td>${new Date(partner.lastActivity).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn-small btn-view" onclick="viewPartnerVisits('${partner.username}')">View Visits</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render all visits table
+            const visitsTable = document.getElementById('adminVisitsTable');
+            
+            if (visits.length === 0) {
+                visitsTable.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: #64748b; padding: 20px;">
+                            No visits recorded yet.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                visitsTable.innerHTML = visits.map(visit => `
+                    <tr>
+                        <td>${visit.partner}</td>
+                        <td>${new Date(visit.date).toLocaleDateString()}</td>
+                        <td>${visit.personName}</td>
+                        <td>${visit.mobileNumber}</td>
+                        <td>${visit.companyName}</td>
+                        <td>${visit.designation}</td>
+                        <td id="admin-location-${visit.id}">
+                            ${visit.location ? `${visit.location.lat.toFixed(3)}, ${visit.location.lng.toFixed(3)}` : 'N/A'}
+                        </td>
+                        <td>
+                            <button class="btn-small btn-view" onclick="viewPhoto(${visit.id})">View</button>
+                        </td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editVisit(${visit.id})">Edit</button>
+                            <button class="btn-small btn-delete" onclick="deleteVisit(${visit.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Load location names for admin table
+                visits.forEach(visit => {
+                    if (visit.location) {
+                        getLocationName(visit.location.lat, visit.location.lng, `admin-location-${visit.id}`);
+                    }
+                });
+            }
+        }
+
+        // Function to get location name from coordinates
+        function getLocationName(lat, lng, elementId) {
+            // Using a free reverse geocoding service
+            fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
+                .then(response => response.json())
+                .then(data => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        const locationName = data.city || data.locality || data.principalSubdivision || 'Unknown Area';
+                        const country = data.countryName || '';
+                        element.innerHTML = `
+                            <div style="font-weight: 600; color: #059669;">${locationName}</div>
+                            <div style="font-size: 0.7rem; color: #6b7280;">${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
+                            ${country ? `<div style="font-size: 0.65rem; color: #9ca3af;">${country}</div>` : ''}
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.log('Geocoding failed:', error);
+                    // Fallback to coordinates only
+                });
+        }
+
+        function editVisit(id) {
+            const visit = visits.find(v => v.id === id);
+            if (!visit) return;
+            
+            if (userRole === 'partner' && !canEdit(visit.createdAt)) {
+                showNotification('Can only edit within 2 hours of creation', 'error');
+                return;
+            }
+            
+            // Create edit modal
+            const modal = document.createElement('div');
+            modal.id = 'editVisitModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 20px; display: flex; align-items: center; gap: 16px;">
+                        ${isMobileDevice() ? `<button onclick="closeEditModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; cursor: pointer;">←</button>` : ''}
+                        <div style="flex: 1; text-align: ${isMobileDevice() ? 'left' : 'center'};">
+                            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700;">Edit Visit Details</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 0.9rem;">Update visit information</p>
+                        </div>
+                    </div>
+                    <form id="editVisitForm" style="padding: 24px;">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Person Name</label>
+                            <input type="text" id="editPersonName" value="${visit.personName}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Mobile Number</label>
+                            <input type="tel" id="editMobileNumber" value="${visit.mobileNumber}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Company Name</label>
+                            <input type="text" id="editCompanyName" value="${visit.companyName}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Designation</label>
+                            <input type="text" id="editDesignation" value="${visit.designation}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Meeting Purpose</label>
+                            <textarea id="editMeetingPurpose" rows="3" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; resize: vertical;">${visit.meetingPurpose || ''}</textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+                            <button type="button" onclick="closeEditModal()" style="background: #6b7280; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; flex: ${isMobileDevice() ? '1' : 'none'};">Cancel</button>
+                            <button type="submit" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; flex: ${isMobileDevice() ? '1' : 'none'};">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) closeEditModal();
+            };
+            
+            document.body.appendChild(modal);
+            
+            // Add mobile navigation if on mobile
+            if (isMobileDevice()) {
+                pushNavigation('Edit Visit', closeEditModal);
+            }
+            
+            // Handle form submission
+            document.getElementById('editVisitForm').onsubmit = function(e) {
+                e.preventDefault();
+                
+                const newPersonName = document.getElementById('editPersonName').value.trim();
+                const newMobileNumber = document.getElementById('editMobileNumber').value.trim();
+                const newCompanyName = document.getElementById('editCompanyName').value.trim();
+                const newDesignation = document.getElementById('editDesignation').value.trim();
+                const newMeetingPurpose = document.getElementById('editMeetingPurpose').value.trim();
+                
+                if (!newPersonName || !newMobileNumber || !newCompanyName || !newDesignation) {
+                    showNotification('Please fill in all required fields', 'error');
+                    return;
+                }
+                
+                // Validate mobile number format
+                const mobileRegex = /^[+]?[0-9\s\-\(\)]{10,}$/;
+                if (!mobileRegex.test(newMobileNumber)) {
+                    showNotification('Please enter a valid mobile number', 'error');
+                    return;
+                }
+                
+                // Update visit
+                visit.personName = newPersonName;
+                visit.mobileNumber = newMobileNumber;
+                visit.companyName = newCompanyName;
+                visit.designation = newDesignation;
+                visit.meetingPurpose = newMeetingPurpose;
+                visit.lastModified = new Date().toISOString();
+                
+                closeEditModal();
+                renderTables();
+                updateStats();
+                showNotification('Visit updated successfully!');
+            };
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editVisitModal');
+            if (modal) {
+                modal.remove();
+            }
+            if (isMobileDevice()) {
+                popNavigation();
+            }
+        }
+
+        function deleteVisit(id) {
+            if (userRole !== 'admin') return;
+            
+            if (confirm('Are you sure you want to delete this visit?')) {
+                visits = visits.filter(v => v.id !== id);
+                
+                // Update partner stats
+                partners.forEach(partner => {
+                    partner.totalVisits = visits.filter(v => v.partner === partner.username).length;
+                });
+                
+                renderTables();
+                updateStats();
+                showNotification('Visit deleted successfully!');
+            }
+        }
+
+        function viewPhoto(id) {
+            const visit = visits.find(v => v.id === id);
+            if (visit && visit.photo) {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.9);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                    cursor: pointer;
+                    padding: 20px;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="text-align: center; max-width: 90%; max-height: 90%;">
+                        <h3 style="color: white; margin-bottom: 16px; font-size: 1.2rem;">${visit.personName} - ${visit.companyName}</h3>
+                        <img src="${visit.photo}" style="max-width: 100%; max-height: 70vh; border-radius: 12px; border: 3px solid white; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+                        <p style="color: #d1d5db; margin-top: 12px; font-size: 0.9rem;">📱 Tap anywhere to close</p>
+                    </div>
+                `;
+                
+                modal.onclick = () => document.body.removeChild(modal);
+                document.body.appendChild(modal);
+            }
+        }
+
+        function viewPartnerVisits(username) {
+            const partnerVisits = visits.filter(v => v.partner === username);
+            
+            if (partnerVisits.length === 0) {
+                showNotification(`No visits found for ${username}`, 'warning');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.id = 'partnerVisitsModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            
+            // Create the table rows separately to ensure template literals are processed
+            const tableRows = partnerVisits.map(visit => {
+                const visitDate = new Date(visit.date).toLocaleDateString();
+                const locationText = visit.location ? 
+                    `${visit.location.lat.toFixed(4)}, ${visit.location.lng.toFixed(4)}` : 
+                    'N/A';
+                    
+                return `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 12px 8px; font-size: 0.85rem;">${visitDate}</td>
+                        <td style="padding: 12px 8px; font-weight: 600; font-size: 0.85rem;">${visit.personName}</td>
+                        <td style="padding: 12px 8px; font-size: 0.85rem;">${visit.companyName}</td>
+                        <td style="padding: 12px 8px; font-size: 0.85rem;">${visit.mobileNumber}</td>
+                        <td style="padding: 12px 8px; font-size: 0.75rem;" id="location-${visit.id}">
+                            ${locationText}
+                        </td>
+                        <td style="padding: 12px 8px;">
+                            <button class="btn-small btn-view" onclick="viewPhoto(${visit.id})" style="font-size: 0.7rem; padding: 4px 8px;">Photo</button>
+                            <button class="btn-small btn-edit" onclick="editVisit(${visit.id})" style="font-size: 0.7rem; padding: 4px 8px;">Edit</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            const backButtonHtml = isMobileDevice() ? 
+                `<button onclick="closePartnerVisitsModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; cursor: pointer;">←</button>` : 
+                '';
+            
+            const titleAlignment = isMobileDevice() ? 'left' : 'center';
+            
+            const closeButtonHtml = !isMobileDevice() ? `
+                <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+                    <button onclick="closePartnerVisitsModal()" style="background: #6b7280; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">Close</button>
+                </div>
+            ` : '';
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 16px; max-width: 90%; max-height: 90%; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 800px;">
+                    <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 20px; display: flex; align-items: center; gap: 16px;">
+                        ${backButtonHtml}
+                        <div style="flex: 1; text-align: ${titleAlignment};">
+                            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700;">Visits by ${username}</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 0.9rem;">${partnerVisits.length} total visits</p>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                                <thead>
+                                    <tr style="background: #f8fafc;">
+                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Date</th>
+                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Person</th>
+                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Company</th>
+                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Mobile</th>
+                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Location</th>
+                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    ${closeButtonHtml}
+                </div>
+            `;
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) closePartnerVisitsModal();
+            };
+            
+            document.body.appendChild(modal);
+            
+            // Add mobile navigation if on mobile
+            if (isMobileDevice()) {
+                pushNavigation(`${username} Visits`, closePartnerVisitsModal);
+            }
+            
+            // Load location names for each visit
+            partnerVisits.forEach(visit => {
+                if (visit.location) {
+                    getLocationName(visit.location.lat, visit.location.lng, `location-${visit.id}`);
+                }
+            });
+        }
+
+        function closePartnerVisitsModal() {
+            const modal = document.getElementById('partnerVisitsModal');
+            if (modal) {
+                modal.remove();
+            }
+            if (isMobileDevice()) {
+                popNavigation();
+            }
+        }
+
+        // Initialize the application
+        window.addEventListener('load', function() {
+            updateStats();
+            renderTables();
+            
+            // Check for location permission status
+            if ('permissions' in navigator) {
+                navigator.permissions.query({name: 'geolocation'}).then(function(result) {
+                    if (result.state === 'granted') {
+                        console.log('Location permission already granted');
+                    } else if (result.state === 'prompt') {
+                        console.log('Location permission will be requested');
+                    } else {
+                        console.log('Location permission denied');
+                    }
+                });
+            }
+        });
+
+        // Handle orientation change on mobile
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateStats, 100);
+        });
+
+        // Handle back button for mobile
+        window.addEventListener('popstate', function(event) {
+            if (userRole) {
+                event.preventDefault();
+                if (confirm('Are you sure you want to logout?')) {
+                    logout();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
