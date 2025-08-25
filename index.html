@@ -4,2089 +4,1399 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visit Management System</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS (xlsx) for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* Custom styles for a more polished and impressive UI */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+        
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #a8a8a8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #888; }
 
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 10px;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
+        /* Page transition animations */
+        .page { 
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; 
             width: 100%;
-            max-width: 420px;
-            margin: 10px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
         }
-
-        .login-header {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            text-align: center;
-            padding: 24px 16px;
-        }
-
-        .login-header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .login-header p {
-            opacity: 0.9;
-            font-size: 0.85rem;
-        }
-
-        .login-body {
-            padding: 24px 20px;
-        }
-
-        .tab-buttons {
-            display: flex;
-            background: #f1f5f9;
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 24px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px 16px;
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .form-section {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .form-section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.9rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 16px; /* Prevents zoom on iOS */
-            transition: all 0.3s ease;
-            background: #ffffff;
-            -webkit-appearance: none;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .form-button {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .form-button:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-        }
-
-        .form-button:active {
-            transform: translateY(0px);
-        }
-
-        .form-link {
-            text-align: center;
-            margin-top: 16px;
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        .form-link a {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .form-link a:hover {
-            text-decoration: underline;
-        }
-
-        .dashboard {
-            display: none;
-            min-height: 100vh;
-            background: #f8fafc;
-        }
-
-        .dashboard.active {
-            display: block;
-        }
-
-        .navbar {
-            background: white;
-            padding: 16px 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e5e7eb;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .mobile-nav {
-            display: none;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #2563eb;
-            padding: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .back-btn:hover {
-            background: #f1f5f9;
-            color: #1d4ed8;
-        }
-
-        .nav-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-            text-align: center;
-            flex: 1;
-        }
-
-        .nav-brand {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #374151;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .location-display {
-            background: linear-gradient(135deg, #059669, #047857);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-        }
-
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-        }
-
-        .main-content {
-            padding: 20px 16px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px 16px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #2563eb;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .content-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            padding: 16px 20px;
-            border-bottom: 1px solid #e5e7eb;
-            font-weight: 700;
-            color: #1e293b;
-            font-size: 1.1rem;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .camera-section {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .video-container {
-            display: inline-block;
-            border: 3px solid #e5e7eb;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #f8fafc;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        #video {
-            width: 100%;
-            max-width: 320px;
-            height: 240px;
-            display: block;
-        }
-
-        #canvas {
-            display: none;
-        }
-
-        .camera-controls {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .camera-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-start {
-            background: linear-gradient(135deg, #059669, #047857);
-            color: white;
-        }
-
-        .btn-capture {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-        }
-
-        .camera-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .photo-preview {
-            margin-top: 16px;
-        }
-
-        .photo-preview img {
-            max-width: 200px;
-            border-radius: 12px;
-            border: 3px solid #e5e7eb;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            border: none;
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            transform: translateY(-2px);
-        }
-
-        .btn-submit:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-            font-size: 0.9rem;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .data-table th {
-            background: #f8fafc;
-            font-weight: 700;
-            color: #374151;
-            font-size: 0.8rem;
-            position: sticky;
-            top: 0;
-        }
-
-        .data-table tr:hover {
-            background: #f8fafc;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .status-editable {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-locked {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-right: 4px;
-            margin-bottom: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-edit {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-delete {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-view {
-            background: #059669;
-            color: white;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            left: 20px;
-            padding: 16px 20px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            z-index: 1000;
-            transform: translateY(-100px);
-            transition: transform 0.3s ease;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        }
-
-        .notification.success {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-
-        .notification.error {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-        }
-
-        .notification.warning {
-            background: linear-gradient(135deg, #d97706, #b45309);
-        }
-
-        .notification.show {
-            transform: translateY(0);
-        }
-
-        .location-requirement {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #92400e;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .loading-overlay {
-            position: fixed;
+        .page.hidden { 
+            opacity: 0; 
+            transform: translateY(10px); 
+            pointer-events: none; 
+            position: absolute; 
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
         }
 
+        /* Custom focus ring for better accessibility */
+        .focus-ring {
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .focus-ring:focus-visible, .focus-ring:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Loading spinner animation */
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            border-top-color: #fff;
+            width: 16px;
+            height: 16px;
             animation: spin 1s linear infinite;
-            margin-right: 16px;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        /* Camera and photo styling */
+        #cameraFeed { width: 100%; height: auto; border-radius: 0.5rem; transform: scaleX(-1); }
+        #photoCanvas { display: none; }
+        #photoPreview { width: 100%; max-width: 250px; height: auto; border-radius: 0.5rem; margin: 0 auto; border: 2px dashed #d1d5db; }
 
-        .data-indicator {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
-        }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .login-card {
-                margin: 5px;
-                border-radius: 12px;
-            }
-
-            .login-body {
-                padding: 20px 16px;
-            }
-
-            .navbar {
-                flex-direction: row;
-                justify-content: flex-start;
-                gap: 16px;
-                padding: 12px 16px;
-                position: sticky;
-                top: 0;
-            }
-
-            .mobile-nav {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                flex: 1;
-            }
-
-            .nav-brand {
-                display: none;
-            }
-
-            .nav-user {
-                justify-content: flex-end;
-                gap: 8px;
-                flex-wrap: nowrap;
-            }
-
-            .user-info {
-                display: none;
-            }
-
-            .location-display {
-                max-width: 120px;
-                font-size: 0.65rem;
-                padding: 4px 8px;
-            }
-
-            .logout-btn {
-                font-size: 0.8rem;
-                padding: 6px 12px;
-            }
-
-            .main-content {
-                padding: 16px 12px;
-            }
-
-            .stats-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-
-            .stat-card {
-                padding: 16px 12px;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
-            }
-
-            .card-body {
-                padding: 16px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .camera-controls {
-                flex-direction: column;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .camera-btn {
-                width: 200px;
-            }
-
-            #video {
-                max-width: 100%;
-                width: 280px;
-                height: 210px;
-            }
-
-            .data-table {
-                font-size: 0.8rem;
-                min-width: 600px;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 8px 6px;
-            }
-
-            .notification {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                padding: 12px 16px;
-                font-size: 0.9rem;
-            }
-
-            .btn-small {
-                font-size: 0.7rem;
-                padding: 4px 8px;
-            }
-
-            /* Modal responsive adjustments */
-            .loading-overlay div[style*="background: white"] {
-                margin: 10px !important;
-                border-radius: 12px !important;
-                max-width: calc(100vw - 20px) !important;
-            }
-        }
-
-        /* Landscape phone optimizations */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .stats-container {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            #video {
-                width: 240px;
-                height: 180px;
-            }
+        /* Password strength indicator styles */
+        #password-strength-bar {
+            height: 5px;
+            width: 0%;
+            border-radius: 2.5px;
+            transition: width 0.3s, background-color 0.3s;
         }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="login-container" id="loginContainer">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>Visit Management System</h1>
-                <p>Professional visit tracking and management</p>
-            </div>
-            
-            <div class="login-body">
-                <div class="tab-buttons">
-                    <button class="tab-btn active" onclick="switchTab('partner')">Partner</button>
-                    <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+<body class="antialiased">
+
+    <!-- Main Application Container -->
+    <div id="app" class="min-h-screen relative">
+
+        <!-- Login and Registration Page -->
+        <section id="auth-page" class="page flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 space-y-6 transform transition-all duration-500">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-gray-800">Visit Management System</h1>
+                    <p class="text-gray-500">Professional visit tracking and management</p>
                 </div>
 
-                <div class="form-section active" id="partnerSection">
-                    <div id="partnerLogin">
-                        <h2 class="form-title">Partner Login</h2>
-                        <form id="partnerLoginForm">
-                            <div class="form-group">
-                                <label>Username</label>
-                                <input type="text" class="form-input" id="partnerUsername" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input type="password" class="form-input" id="partnerPassword" required>
-                            </div>
-                            <button type="submit" class="form-button">Sign In</button>
-                        </form>
-                        <div class="form-link">
-                            Don't have an account? <a onclick="showRegister()">Create Account</a>
-                        </div>
-                    </div>
-
-                    <div id="partnerRegister" style="display: none;">
-                        <h2 class="form-title">Create Account</h2>
-                        <form id="partnerRegisterForm">
-                            <div class="form-group">
-                                <label>Username</label>
-                                <input type="text" class="form-input" id="regUsername" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input type="password" class="form-input" id="regPassword" required>
-                            </div>
-                            <button type="submit" class="form-button">Create Account</button>
-                        </form>
-                        <div class="form-link">
-                            Already have an account? <a onclick="showLogin()">Sign In</a>
-                        </div>
-                    </div>
+                <div class="flex bg-gray-100 p-1 rounded-lg">
+                    <button id="partner-tab" class="w-1/2 p-2 rounded-md text-sm font-semibold text-white bg-indigo-600 shadow focus-ring">Partner</button>
+                    <button id="admin-tab" class="w-1/2 p-2 rounded-md text-sm font-semibold text-gray-600 focus-ring">Admin</button>
                 </div>
 
-                <div class="form-section" id="adminSection">
-                    <h2 class="form-title">Admin Login</h2>
-                    <form id="adminLoginForm">
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" class="form-input" id="adminUsername" required>
+                <div id="partner-form-container">
+                    <form id="partner-login-form" class="space-y-4">
+                        <h2 class="text-xl font-semibold text-center text-gray-700">Partner Login</h2>
+                        <div>
+                            <label for="login-email" class="text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="login-email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
                         </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" class="form-input" id="adminPassword" required>
+                        <div>
+                            <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="login-password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
                         </div>
-                        <button type="submit" class="form-button">Admin Sign In</button>
+                        <button type="submit" class="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus-ring disabled:bg-indigo-400">
+                            <span class="btn-text">Sign In</span>
+                            <div class="spinner hidden ml-2"></div>
+                        </button>
+                        <p class="text-center text-sm text-gray-600">
+                            Don't have an account? <a href="#" id="show-register-link" class="font-medium text-indigo-600 hover:text-indigo-500">Create Account</a>
+                        </p>
+                    </form>
+
+                    <form id="partner-register-form" class="hidden space-y-4">
+                        <h2 class="text-xl font-semibold text-center text-gray-700">Create Partner Account</h2>
+                        <div>
+                            <label for="register-fullname" class="text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="register-fullname" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
+                        </div>
+                        <div>
+                            <label for="register-username" class="text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="register-username" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
+                             <p id="username-error" class="text-xs text-red-500 mt-1 hidden"></p>
+                        </div>
+                        <div>
+                            <label for="register-email" class="text-sm font-medium text-gray-700">Email Address</label>
+                            <input type="email" id="register-email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
+                        </div>
+                        <div>
+                            <label for="register-password" class="text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="register-password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
+                            <div class="mt-2">
+                                <div id="password-strength-bar" class="bg-gray-200"></div>
+                                <p id="password-strength-text" class="text-xs text-gray-500 mt-1"></p>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus-ring disabled:bg-indigo-400">
+                            <span class="btn-text">Register</span>
+                            <div class="spinner hidden ml-2"></div>
+                        </button>
+                        <p class="text-center text-sm text-gray-600">
+                            Already have an account? <a href="#" id="show-login-link" class="font-medium text-indigo-600 hover:text-indigo-500">Sign In</a>
+                        </p>
                     </form>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="dashboard" id="partnerDashboard">
-        <nav class="navbar">
-            <div class="mobile-nav">
-                <button class="back-btn" id="partnerBackBtn" onclick="handleBackNavigation()" style="display: none;">
-                    ← <span class="nav-title" id="partnerNavTitle">Dashboard</span>
-                </button>
-                <div class="nav-brand">Partner Dashboard</div>
+                <form id="admin-login-form" class="hidden space-y-4">
+                    <h2 class="text-xl font-semibold text-center text-gray-700">Admin Login</h2>
+                    <div>
+                        <label for="admin-email" class="text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="admin-email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
+                    </div>
+                    <div>
+                        <label for="admin-password" class="text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="admin-password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring">
+                    </div>
+                    <button type="submit" class="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus-ring disabled:bg-indigo-400">
+                        <span class="btn-text">Sign In</span>
+                        <div class="spinner hidden ml-2"></div>
+                    </button>
+                </form>
+                <p id="auth-error" class="text-center text-sm text-red-500 mt-4"></p>
+                <p class="text-center text-xs text-gray-400 mt-6">v3.4</p>
             </div>
-            <div class="nav-user">
-                <div class="user-info">
-                    <span id="partnerName">Partner</span>
-                </div>
-                <div class="location-display" id="locationDisplay">Getting location...</div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-        </nav>
+        </section>
 
-        <div class="main-content">
-            <div class="data-indicator">
-                💾 All data is automatically saved and will persist between sessions
-            </div>
+        <!-- Partner Dashboard Page -->
+        <section id="partner-dashboard" class="page hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center py-3">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-lg text-gray-800">Partner Dashboard</span>
+                            <span id="user-info" class="text-sm font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full"></span>
+                            <span id="geo-info" class="text-sm font-medium bg-green-100 text-green-800 px-3 py-1 rounded-full hidden items-center"></span>
+                        </div>
+                        <button id="logout-btn-partner" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus-ring">Logout</button>
+                    </div>
+                </div>
+            </header>
 
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-value" id="adminTotalPartners">0</div>
-                    <div class="stat-label">Registered Partners</div>
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Visits</p>
+                            <p id="total-visits-partner" class="text-3xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Today's Visits</p>
+                            <p id="today-visits-partner" class="text-3xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Editable Visits</p>
+                            <p id="editable-visits-partner" class="text-3xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="adminTodayVisits">0</div>
-                    <div class="stat-label">Today's Visits</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="adminCompanies">0</div>
-                    <div class="stat-label">Companies</div>
-                </div>
-            </div>
 
-            <div class="content-card">
-                <div class="card-header">Registered Partners</div>
-                <div class="card-body">
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
+                <!-- New Visit Entry Form -->
+                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">New Visit Entry</h2>
+                    <form id="visit-form" class="space-y-6">
+                        <!-- Camera and Photo Section -->
+                        <div class="text-center">
+                            <div class="w-full max-w-xs mx-auto bg-gray-100 rounded-lg p-2">
+                                <video id="cameraFeed" autoplay playsinline class="hidden"></video>
+                                <canvas id="photoCanvas"></canvas>
+                                <img id="photoPreview" src="https://placehold.co/250x188/e2e8f0/cbd5e0?text=Photo+Required" alt="Photo Preview">
+                            </div>
+                            <div class="mt-4 flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                                <button type="button" id="start-camera-btn" class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 focus-ring">Start Camera</button>
+                                <button type="button" id="capture-photo-btn" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 focus-ring" disabled>Capture Photo</button>
+                            </div>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="space-y-6">
+                            <div>
+                                <label for="person-name" class="block text-sm font-medium text-gray-700">Person Name</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                    <input type="text" id="person-name" required class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm focus-ring">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mobile-number" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5A1.5 1.5 0 0116.5 18h-13A1.5 1.5 0 012 16.5v-13z" /></svg>
+                                    </div>
+                                    <input type="tel" id="mobile-number" required class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm focus-ring">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="company-name" class="block text-sm font-medium text-gray-700">Company Name</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4zm4.5 5a.5.5 0 000 1h3a.5.5 0 000-1h-3z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                    <input type="text" id="company-name" required class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm focus-ring">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="designation" class="block text-sm font-medium text-gray-700">Designation</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                    <input type="text" id="designation" required class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm focus-ring">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="meeting-purpose" class="block text-sm font-medium text-gray-700">Meeting Purpose</label>
+                            <textarea id="meeting-purpose" rows="3" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus-ring"></textarea>
+                        </div>
+                        <button type="submit" id="submit-visit-btn" class="w-full flex items-center justify-center py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus-ring disabled:bg-gray-400" disabled>
+                            <span class="btn-text">Submit Visit</span>
+                            <div class="spinner hidden ml-2"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Visit History Table -->
+                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Visit History</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th>Username</th>
-                                    <th>Registration Date</th>
-                                    <th>Total Visits</th>
-                                    <th>Last Activity</th>
-                                    <th>Actions</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Person</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="partnersTable"></tbody>
+                            <tbody id="partner-visits-table" class="bg-white divide-y divide-gray-200">
+                                <!-- Rows will be inserted here by JavaScript -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </main>
+        </section>
 
-            <div class="content-card">
-                <div class="card-header">All Visits</div>
-                <div class="card-body">
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
+        <!-- Admin Dashboard Page -->
+        <section id="admin-dashboard" class="page hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center py-3">
+                        <span class="font-bold text-lg text-gray-800">Administrator Dashboard</span>
+                        <button id="logout-btn-admin" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus-ring">Logout</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-gray-500">Total Visits</p>
+                        <p id="total-visits-admin" class="text-3xl font-bold text-gray-900">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-gray-500">Registered Partners</p>
+                        <p id="total-partners-admin" class="text-3xl font-bold text-gray-900">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-gray-500">Today's Visits</p>
+                        <p id="today-visits-admin" class="text-3xl font-bold text-gray-900">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-gray-500">Companies</p>
+                        <p id="total-companies-admin" class="text-3xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+
+                <!-- Registered Partners Table -->
+                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Registered Partners</h2>
+                        <button id="export-partners-btn" class="px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 focus-ring">Export All Partners Data</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th>Partner</th>
-                                    <th>Date</th>
-                                    <th>Person</th>
-                                    <th>Mobile</th>
-                                    <th>Company</th>
-                                    <th>Designation</th>
-                                    <th>Location</th>
-                                    <th>Photo</th>
-                                    <th>Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registration Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Visits</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="adminVisitsTable"></tbody>
+                            <tbody id="admin-partners-table" class="bg-white divide-y divide-gray-200"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- All Visits Table -->
+                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h2 id="all-visits-header" class="text-2xl font-bold text-gray-800">All Visits</h2>
+                        <div class="flex items-center space-x-2">
+                            <button id="show-all-visits-btn" class="hidden px-4 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 focus-ring">Show All Visits</button>
+                            <button id="export-visits-btn" class="px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 focus-ring">Export Displayed Visits</button>
+                            <button id="filter-visits-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 focus-ring">Filter Visits</button>
+                        </div>
+                    </div>
+                    <!-- Filter Section (hidden by default) -->
+                    <div id="filter-section" class="hidden bg-gray-50 p-4 rounded-lg mb-6 space-y-4 md:space-y-0 md:flex md:items-center md:space-x-4">
+                        <input type="date" id="start-date-filter" class="w-full md:w-auto border-gray-300 rounded-md shadow-sm focus-ring">
+                        <input type="date" id="end-date-filter" class="w-full md:w-auto border-gray-300 rounded-md shadow-sm focus-ring">
+                        <select id="partner-filter" class="w-full md:w-auto border-gray-300 rounded-md shadow-sm focus-ring">
+                            <option value="">All Partners</option>
+                        </select>
+                        <button id="apply-filters-btn" class="w-full md:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg focus-ring">Apply</button>
+                        <button id="reset-filters-btn" class="w-full md:w-auto px-4 py-2 bg-gray-500 text-white rounded-lg focus-ring">Reset</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Partner</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Person</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mobile</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Photo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-visits-table" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Edit Modal -->
+        <div id="edit-modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-60 overflow-y-auto h-full w-full z-20 flex items-center justify-center">
+            <div class="relative mx-auto p-6 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+                <div class="text-center">
+                    <h3 class="text-xl leading-6 font-bold text-gray-900">Edit Visit Details</h3>
+                    <div class="mt-4 px-7 py-3">
+                        <form id="edit-visit-form" class="space-y-4 text-left">
+                            <input type="hidden" id="edit-visit-id">
+                            <div>
+                                <label for="edit-person-name" class="text-sm font-medium">Person Name</label>
+                                <input type="text" id="edit-person-name" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus-ring">
+                            </div>
+                            <div>
+                                <label for="edit-mobile-number" class="text-sm font-medium">Mobile Number</label>
+                                <input type="tel" id="edit-mobile-number" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus-ring">
+                            </div>
+                            <div>
+                                <label for="edit-company-name" class="text-sm font-medium">Company Name</label>
+                                <input type="text" id="edit-company-name" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus-ring">
+                            </div>
+                            <div>
+                                <label for="edit-designation" class="text-sm font-medium">Designation</label>
+                                <input type="text" id="edit-designation" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus-ring">
+                            </div>
+                            <div>
+                                <label for="edit-meeting-purpose" class="text-sm font-medium">Meeting Purpose</label>
+                                <textarea id="edit-meeting-purpose" rows="3" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus-ring"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="items-center px-4 py-3 space-x-4">
+                        <button id="save-edit-btn" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-auto shadow-sm hover:bg-green-600 focus-ring">Save Changes</button>
+                        <button id="cancel-edit-btn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto ml-2 shadow-sm hover:bg-gray-600 focus-ring">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Universal Modal -->
+        <div id="universal-modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-60 overflow-y-auto h-full w-full z-30 flex items-center justify-center p-4">
+            <div class="relative mx-auto p-6 border w-full max-w-sm shadow-lg rounded-2xl bg-white transform transition-all duration-300 scale-95 opacity-0" id="universal-modal-content">
+                <div class="text-center">
+                    <div id="modal-icon-container" class="mx-auto flex items-center justify-center h-16 w-16 rounded-full">
+                        <!-- Icon will be inserted here -->
+                    </div>
+                    <h3 id="modal-title" class="text-xl leading-6 font-bold text-gray-900 mt-4"></h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p id="modal-text" class="text-sm text-gray-600"></p>
+                    </div>
+                    <div id="modal-actions" class="items-center px-4 py-3 space-x-4">
+                        <!-- Buttons will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Viewer Modal -->
+        <div id="photo-modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-75 z-40 flex items-center justify-center p-4">
+            <div class="relative bg-white p-4 rounded-lg shadow-xl max-w-3xl max-h-full">
+                <button id="photo-modal-close" class="absolute -top-3 -right-3 h-8 w-8 bg-white rounded-full text-gray-600 hover:text-gray-900 focus-ring">&times;</button>
+                <img id="photo-modal-img" src="" alt="Visit Photo" class="max-w-full max-h-[80vh] object-contain">
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        let currentUser = null;
-        let userRole = null;
-        let visits = [];
-        let partners = [];
-        let capturedPhoto = null;
-        let currentLocation = null;
-        let cameraStream = null;
-        let locationGranted = false;
-        let navigationStack = [];
+    <script type="module">
+        // =====================================================================================
+        // APPLICATION SETUP & CONSTANTS
+        // =====================================================================================
+        const SUPABASE_URL = 'https://vkoxroooikghnmgedxvk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrb3hyb29vaWtnaG5tZ2VkeHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjM5MTksImV4cCI6MjA3MTYzOTkxOX0.XSxM-WsfpT4OGH3xT1AyU2JzUnlQYWnfjlgCH88ZpTw';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const ADMIN_CREDENTIALS = {
-            username: 'admin@valotech',
-            password: 'adminpass@#123'
+        const DOM = {
+            app: document.getElementById('app'),
+            pages: {
+                auth: document.getElementById('auth-page'),
+                partner: document.getElementById('partner-dashboard'),
+                admin: document.getElementById('admin-dashboard'),
+            },
+            authError: document.getElementById('auth-error'),
         };
 
-        // Storage Management Functions
-        function saveToStorage() {
-            try {
-                const data = {
-                    visits: visits,
-                    partners: partners,
-                    timestamp: new Date().toISOString()
-                };
-                localStorage.setItem('visitManagementData', JSON.stringify(data));
-                console.log('Data saved to localStorage');
-            } catch (error) {
-                console.error('Failed to save data to localStorage:', error);
-                showNotification('Warning: Data could not be saved automatically', 'warning');
-            }
-        }
+        // =====================================================================================
+        // APPLICATION STATE
+        // =====================================================================================
+        let state = {
+            currentUser: null,
+            userProfile: null,
+            userLocation: null,
+            capturedPhotoBlob: null,
+            cameraStream: null,
+            allVisitsData: [],
+            allPartnersData: [],
+            renderedVisits: [], // For exporting currently displayed data
+            activePage: 'auth',
+        };
 
-        function loadFromStorage() {
-            try {
-                const savedData = localStorage.getItem('visitManagementData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    visits = data.visits || [];
-                    partners = data.partners || [];
-                    
-                    // Convert string dates back to Date objects where necessary
-                    visits.forEach(visit => {
-                        if (typeof visit.createdAt === 'string') {
-                            visit.createdAt = new Date(visit.createdAt);
-                        }
-                    });
-                    
-                    console.log(`Loaded ${visits.length} visits and ${partners.length} partners from storage`);
-                    return true;
-                } else {
-                    console.log('No saved data found');
-                    return false;
-                }
-            } catch (error) {
-                console.error('Failed to load data from localStorage:', error);
-                showNotification('Warning: Could not load saved data', 'warning');
+        // =====================================================================================
+        // UI & UTILITY FUNCTIONS
+        // =====================================================================================
+
+        /**
+         * Manages button loading states with a spinner.
+         * @param {HTMLButtonElement} button - The button element.
+         * @param {boolean} isLoading - Whether to show the loading state.
+         */
+        const setButtonLoading = (button, isLoading) => {
+            if (!button) return;
+            const btnText = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.spinner');
+            if (isLoading) {
+                button.disabled = true;
+                if(btnText) btnText.classList.add('hidden');
+                if(spinner) spinner.classList.remove('hidden');
+            } else {
+                button.disabled = false;
+                if(btnText) btnText.classList.remove('hidden');
+                if(spinner) spinner.classList.add('hidden');
+            }
+        };
+
+        /**
+         * Switches the visible page with a smooth animation.
+         * @param {string} pageName - The name of the page to show ('auth', 'partner', 'admin').
+         */
+        const showPage = (pageName) => {
+            if (state.activePage === pageName && !DOM.pages[pageName].classList.contains('hidden')) return;
+            
+            Object.values(DOM.pages).forEach(page => page.classList.add('hidden'));
+            
+            const newPage = DOM.pages[pageName];
+            if (newPage) {
+                newPage.classList.remove('hidden');
+                state.activePage = pageName;
+            }
+        };
+
+        /**
+         * A versatile modal for showing information, success, errors, or confirmations.
+         * @param {'info'|'success'|'error'|'confirm'} type - The type of modal.
+         * @param {string} title - The title of the modal.
+         * @param {string} text - The main message text.
+         * @param {Function} [onConfirm] - Callback for the confirm button.
+         */
+        const showModal = (type, title, text, onConfirm) => {
+            const modal = document.getElementById('universal-modal');
+            const modalContent = document.getElementById('universal-modal-content');
+            const iconContainer = document.getElementById('modal-icon-container');
+            const titleEl = document.getElementById('modal-title');
+            const textEl = document.getElementById('modal-text');
+            const actionsEl = document.getElementById('modal-actions');
+
+            // Reset
+            actionsEl.innerHTML = '';
+            iconContainer.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full';
+
+            // Set content
+            titleEl.textContent = title;
+            textEl.textContent = text;
+
+            // Set icon and actions based on type
+            switch (type) {
+                case 'success':
+                    iconContainer.classList.add('bg-green-100');
+                    iconContainer.innerHTML = `<svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+                    actionsEl.innerHTML = `<button id="modal-ok-btn" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus-ring">OK</button>`;
+                    break;
+                case 'error':
+                    iconContainer.classList.add('bg-red-100');
+                    iconContainer.innerHTML = `<svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+                    actionsEl.innerHTML = `<button id="modal-ok-btn" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus-ring">OK</button>`;
+                    break;
+                case 'confirm':
+                    iconContainer.classList.add('bg-yellow-100');
+                    iconContainer.innerHTML = `<svg class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                    actionsEl.innerHTML = `
+                        <button id="modal-cancel-btn" class="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 focus-ring">Cancel</button>
+                        <button id="modal-confirm-btn" class="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus-ring">Confirm</button>
+                    `;
+                    break;
+            }
+
+            // Show modal with animation
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+
+            // Event listeners
+            const closeModal = () => {
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            };
+
+            const okBtn = document.getElementById('modal-ok-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+
+            if (okBtn) okBtn.addEventListener('click', closeModal, { once: true });
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModal, { once: true });
+            if (confirmBtn && onConfirm) {
+                confirmBtn.addEventListener('click', () => {
+                    onConfirm();
+                    closeModal();
+                }, { once: true });
+            }
+        };
+
+        /**
+         * Debounce function to delay execution of a function.
+         * @param {Function} func - The function to debounce.
+         * @param {number} delay - The delay in milliseconds.
+         * @returns {Function} The debounced function.
+         */
+        const debounce = (func, delay) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        };
+        
+        /**
+         * Converts a data URL to a Blob object.
+         * @param {string} dataUrl - The data URL to convert.
+         * @returns {Blob} The resulting Blob.
+         */
+        const dataURLtoBlob = (dataUrl) => {
+            const arr = dataUrl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        };
+        
+        /**
+         * Exports an array of objects to an Excel file.
+         * @param {Array<Object>} data - The data to export.
+         * @param {string} filename - The name of the file.
+         */
+        const exportToExcel = (data, filename) => {
+            if (!data || data.length === 0) {
+                showModal('error', 'Export Failed', 'There is no data to export.');
+                return;
+            }
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+            XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`);
+        };
+
+        // =====================================================================================
+        // AUTHENTICATION LOGIC
+        // =====================================================================================
+
+        const checkUsernameAvailability = async (username) => {
+            const usernameErrorEl = document.getElementById('username-error');
+            if (!username) {
+                usernameErrorEl.classList.add('hidden');
+                return true;
+            }
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('username')
+                .eq('username', username)
+                .maybeSingle();
+
+            if (data) {
+                usernameErrorEl.textContent = 'Username is already taken.';
+                usernameErrorEl.classList.remove('hidden');
                 return false;
+            } else {
+                usernameErrorEl.classList.add('hidden');
+                return true;
             }
-        }
+        };
 
-        function clearStorage() {
+        const checkPasswordStrength = (password) => {
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthText = document.getElementById('password-strength-text');
+            let score = 0;
+            if (password.length > 8) score++;
+            if (password.match(/[a-z]/)) score++;
+            if (password.match(/[A-Z]/)) score++;
+            if (password.match(/[0-9]/)) score++;
+            if (password.match(/[^a-zA-Z0-9]/)) score++;
+
+            switch (score) {
+                case 0:
+                case 1:
+                    strengthBar.style.width = '20%';
+                    strengthBar.style.backgroundColor = '#ef4444'; // red-500
+                    strengthText.textContent = 'Very Weak';
+                    break;
+                case 2:
+                    strengthBar.style.width = '40%';
+                    strengthBar.style.backgroundColor = '#f97316'; // orange-500
+                    strengthText.textContent = 'Weak';
+                    break;
+                case 3:
+                    strengthBar.style.width = '60%';
+                    strengthBar.style.backgroundColor = '#eab308'; // yellow-500
+                    strengthText.textContent = 'Moderate';
+                    break;
+                case 4:
+                    strengthBar.style.width = '80%';
+                    strengthBar.style.backgroundColor = '#84cc16'; // lime-500
+                    strengthText.textContent = 'Strong';
+                    break;
+                case 5:
+                    strengthBar.style.width = '100%';
+                    strengthBar.style.backgroundColor = '#22c55e'; // green-500
+                    strengthText.textContent = 'Very Strong';
+                    break;
+                default:
+                    strengthBar.style.width = '0%';
+                    strengthText.textContent = '';
+            }
+        };
+
+        document.getElementById('partner-register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            setButtonLoading(submitButton, true);
+            DOM.authError.textContent = '';
+
+            const fullName = document.getElementById('register-fullname').value;
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            const isUsernameAvailable = await checkUsernameAvailability(username);
+            if (!isUsernameAvailable) {
+                setButtonLoading(submitButton, false);
+                return;
+            }
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        username: username,
+                    }
+                }
+            });
+
+            if (error) {
+                DOM.authError.textContent = error.message;
+            } else {
+                showModal('success', 'Registration Successful!', 'You can now sign in with your new account.');
+                document.getElementById('show-login-link').click();
+                form.reset();
+            }
+            setButtonLoading(submitButton, false);
+        });
+
+        document.getElementById('partner-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            setButtonLoading(submitButton, true);
+            DOM.authError.textContent = '';
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
             try {
-                localStorage.removeItem('visitManagementData');
-                console.log('Storage cleared');
-            } catch (error) {
-                console.error('Failed to clear storage:', error);
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+
+                if (error) {
+                    console.error("Login failed:", error.message);
+                    DOM.authError.textContent = 'Invalid login credentials. Please try again.';
+                } 
+                // onAuthStateChange will handle successful login and redirect
+            } catch (err) {
+                console.error("Unexpected login error:", err);
+                DOM.authError.textContent = 'An unexpected error occurred. Please try again later.';
+            } finally {
+                setButtonLoading(submitButton, false);
             }
-        }
+        });
+        
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            setButtonLoading(submitButton, true);
+            DOM.authError.textContent = '';
 
-        // Mobile navigation functions
-        function isMobileDevice() {
-            return window.innerWidth <= 768;
-        }
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
 
-        function updateMobileNavigation() {
-            if (!isMobileDevice()) return;
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password,
+                });
 
-            const partnerBackBtn = document.getElementById('partnerBackBtn');
-            const adminBackBtn = document.getElementById('adminBackBtn');
-            const partnerNavTitle = document.getElementById('partnerNavTitle');
-            const adminNavTitle = document.getElementById('adminNavTitle');
-
-            if (userRole === 'partner') {
-                if (navigationStack.length > 0) {
-                    partnerBackBtn.style.display = 'flex';
-                    partnerNavTitle.textContent = navigationStack[navigationStack.length - 1].title;
-                } else {
-                    partnerBackBtn.style.display = 'none';
-                    partnerNavTitle.textContent = 'Partner Dashboard';
+                if (error) {
+                    console.error("Admin login failed:", error.message);
+                    DOM.authError.textContent = 'Invalid admin credentials.';
+                    return;
                 }
-            } else if (userRole === 'admin') {
-                if (navigationStack.length > 0) {
-                    adminBackBtn.style.display = 'flex';
-                    adminNavTitle.textContent = navigationStack[navigationStack.length - 1].title;
-                } else {
-                    adminBackBtn.style.display = 'none';
-                    adminNavTitle.textContent = 'Admin Dashboard';
+
+                if (data.user) {
+                    const profile = await fetchUserProfile(data.user.id);
+                    if (profile && profile.role === 'admin') {
+                        state.currentUser = data.user;
+                        state.userProfile = profile;
+                        await loadAdminDashboard();
+                    } else {
+                        await supabaseClient.auth.signOut();
+                        DOM.authError.textContent = 'Access denied. Not an admin user.';
+                    }
                 }
+            } catch (err) {
+                console.error("Unexpected admin login error:", err);
+                DOM.authError.textContent = 'An unexpected error occurred. Please try again later.';
+            } finally {
+                setButtonLoading(submitButton, false);
             }
-        }
+        });
 
-        function pushNavigation(title, onBack) {
-            navigationStack.push({ title, onBack });
-            updateMobileNavigation();
-        }
+        const signOut = async () => {
+            const { error } = await supabaseClient.auth.signOut();
+            state.currentUser = null;
+            state.userProfile = null;
+            showPage('auth');
+        };
 
-        function popNavigation() {
-            if (navigationStack.length > 0) {
-                const nav = navigationStack.pop();
-                updateMobileNavigation();
-                if (nav.onBack) {
-                    nav.onBack();
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+                if (state.currentUser?.id !== session.user.id) {
+                    state.currentUser = session.user;
+                    await fetchUserProfile();
+                    if (state.userProfile && state.userProfile.role === 'admin') {
+                        await loadAdminDashboard();
+                    } else {
+                        await loadPartnerDashboard();
+                    }
                 }
-                return nav;
+            } else if (event === 'SIGNED_OUT') {
+                state.currentUser = null;
+                state.userProfile = null;
+                showPage('auth');
+            }
+        });
+
+        const fetchUserProfile = async (userId = null) => {
+            const idToFetch = userId || state.currentUser?.id;
+            if (!idToFetch) return null;
+            
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('full_name, username, role')
+                .eq('id', idToFetch)
+                .single();
+            
+            if (data) {
+                state.userProfile = data;
+                return data;
             }
             return null;
-        }
+        };
 
-        function handleBackNavigation() {
-            popNavigation();
-        }
+        // =====================================================================================
+        // PARTNER DASHBOARD LOGIC
+        // =====================================================================================
+        
+        const loadPartnerDashboard = async () => {
+            showPage('partner');
+            document.getElementById('user-info').textContent = state.userProfile?.full_name || state.currentUser.email;
+            await getGeoLocation();
+            await fetchPartnerStats();
+            await fetchPartnerVisits();
+        };
 
-        function clearNavigation() {
-            navigationStack = [];
-            updateMobileNavigation();
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.classList.add('show'), 100);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
-        }
-
-        function showLoading(message = 'Loading...') {
-            const overlay = document.createElement('div');
-            overlay.className = 'loading-overlay';
-            overlay.id = 'loadingOverlay';
-            overlay.innerHTML = `
-                <div class="spinner"></div>
-                ${message}
-            `;
-            document.body.appendChild(overlay);
-        }
-
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) {
-                document.body.removeChild(overlay);
-            }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tab + 'Section').classList.add('active');
-        }
-
-        function showRegister() {
-            document.getElementById('partnerLogin').style.display = 'none';
-            document.getElementById('partnerRegister').style.display = 'block';
-        }
-
-        function showLogin() {
-            document.getElementById('partnerLogin').style.display = 'block';
-            document.getElementById('partnerRegister').style.display = 'none';
-        }
-
-        document.getElementById('partnerRegisterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('regUsername').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            
-            if (!username || !password) {
-                showNotification('Please fill in all fields', 'error');
-                return;
-            }
-
-            if (username.length < 3) {
-                showNotification('Username must be at least 3 characters long', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showNotification('Password must be at least 6 characters long', 'error');
-                return;
-            }
-
-            if (partners.find(p => p.username === username)) {
-                showNotification('Username already exists', 'error');
-                return;
-            }
-            
-            const newPartner = {
-                id: Date.now(),
-                username: username,
-                password: password,
-                registrationDate: new Date().toISOString(),
-                totalVisits: 0,
-                lastActivity: new Date().toISOString()
-            };
-            
-            partners.push(newPartner);
-            saveToStorage(); // Save immediately after adding partner
-            showNotification('Account created successfully! Data saved.');
-            showLogin();
-            document.getElementById('partnerRegisterForm').reset();
-        });
-
-        document.getElementById('partnerLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('partnerUsername').value.trim();
-            const password = document.getElementById('partnerPassword').value.trim();
-            
-            if (!username || !password) {
-                showNotification('Please fill in all fields', 'error');
-                return;
-            }
-            
-            const partner = partners.find(p => p.username === username && p.password === password);
-            
-            if (partner) {
-                login(partner, 'partner');
-            } else {
-                showNotification('Invalid username or password', 'error');
-            }
-        });
-
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('adminUsername').value.trim();
-            const password = document.getElementById('adminPassword').value.trim();
-            
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                login({ username: 'admin' }, 'admin');
-            } else {
-                showNotification('Invalid admin credentials', 'error');
-            }
-        });
-
-        function login(user, role) {
-            showLoading('Signing you in...');
-            
-            setTimeout(() => {
-                currentUser = user;
-                userRole = role;
-                
-                document.getElementById('loginContainer').style.display = 'none';
-                
-                if (role === 'partner') {
-                    document.getElementById('partnerDashboard').classList.add('active');
-                    document.getElementById('partnerName').textContent = user.username;
-                    getCurrentLocation();
-                    
-                    const partner = partners.find(p => p.username === user.username);
-                    if (partner) {
-                        partner.lastActivity = new Date().toISOString();
-                        saveToStorage(); // Save updated activity
-                    }
-                } else {
-                    document.getElementById('adminDashboard').classList.add('active');
+        const getGeoLocation = () => {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    showModal('error', 'Geolocation Error', 'Geolocation is not supported by this browser.');
+                    return resolve();
                 }
-                
-                clearNavigation(); // Reset navigation stack
-                updateStats();
-                renderTables();
-                hideLoading();
-                showNotification(`Welcome back ${user.username}!`);
-            }, 1000);
-        }
-
-        function logout() {
-            currentUser = null;
-            userRole = null;
-            locationGranted = false;
-            clearNavigation(); // Clear navigation stack
-            
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('partnerDashboard').classList.remove('active');
-            document.getElementById('adminDashboard').classList.remove('active');
-            
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-            
-            // Close any open modals
-            const modals = document.querySelectorAll('[id$="Modal"]');
-            modals.forEach(modal => modal.remove());
-            
-            document.querySelectorAll('form').forEach(form => form.reset());
-            document.getElementById('photoPreview').innerHTML = '';
-            capturedPhoto = null;
-            
-            // Reset submit button
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submit Visit';
-        }
-
-        function getCurrentLocation() {
-            showLoading('Getting your location...');
-            
-            if (!navigator.geolocation) {
-                hideLoading();
-                showNotification('Location is not supported by this browser', 'error');
-                showLocationRequirement();
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    currentLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    };
-                    locationGranted = true;
-                    
-                    document.getElementById('locationDisplay').textContent = 
-                        `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
-                    
-                    document.getElementById('locationRequirement').style.display = 'none';
-                    document.getElementById('visitEntryCard').style.display = 'block';
-                    updateSubmitButton();
-                    
-                    hideLoading();
-                    showNotification('Location acquired successfully!');
-                },
-                function(error) {
-                    hideLoading();
-                    let errorMessage = 'Location access denied';
-                    
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage = 'Location access denied. Please enable location sharing.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage = 'Location information unavailable.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage = 'Location request timed out.';
-                            break;
-                    }
-                    
-                    showNotification(errorMessage, 'error');
-                    showLocationRequirement();
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 0
-                }
-            );
-        }
-
-        function showLocationRequirement() {
-            document.getElementById('locationRequirement').style.display = 'block';
-            document.getElementById('visitEntryCard').style.display = 'none';
-            locationGranted = false;
-            updateSubmitButton();
-        }
-
-        function startCamera() {
-            if (!locationGranted) {
-                showNotification('Location is required before starting camera', 'warning');
-                return;
-            }
-
-            showLoading('Starting camera...');
-
-            // Determine if this is likely a mobile device
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            // Camera constraints - prefer front camera on mobile
-            const constraints = {
-                video: {
-                    width: { ideal: 320 },
-                    height: { ideal: 240 },
-                    facingMode: isMobile ? 'user' : 'environment' // 'user' = front camera, 'environment' = back camera
-                }
-            };
-
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(function(stream) {
-                    cameraStream = stream;
-                    document.getElementById('video').srcObject = stream;
-                    hideLoading();
-                    showNotification('Camera started successfully');
-                })
-                .catch(function(err) {
-                    hideLoading();
-                    console.log('Camera error:', err);
-                    
-                    // Try fallback constraints if the preferred camera fails
-                    if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
-                        const fallbackConstraints = {
-                            video: {
-                                width: { ideal: 320 },
-                                height: { ideal: 240 }
-                            }
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        state.userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
                         };
-                        
-                        navigator.mediaDevices.getUserMedia(fallbackConstraints)
-                            .then(function(stream) {
-                                cameraStream = stream;
-                                document.getElementById('video').srcObject = stream;
-                                showNotification('Camera started (fallback mode)');
-                            })
-                            .catch(function() {
-                                showNotification('Camera access denied or unavailable', 'error');
-                            });
-                    } else {
-                        showNotification('Camera access denied or unavailable', 'error');
+                        const geoInfo = document.getElementById('geo-info');
+                        geoInfo.innerHTML = `<svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> <span>${state.userLocation.latitude.toFixed(4)}, ${state.userLocation.longitude.toFixed(4)}</span>`;
+                        geoInfo.classList.remove('hidden');
+                        geoInfo.classList.add('flex');
+                        validateFormCompletion();
+                        resolve();
+                    },
+                    () => {
+                        showModal('error', 'Geolocation Error', 'Please enable location access to submit visits.');
+                        resolve();
                     }
-                });
-        }
+                );
+            });
+        };
 
-        function capturePhoto() {
-            if (!locationGranted) {
-                showNotification('Location is required before capturing photo', 'warning');
-                return;
+        const startCamera = async () => {
+            const video = document.getElementById('cameraFeed');
+            const photoPreview = document.getElementById('photoPreview');
+            const captureBtn = document.getElementById('capture-photo-btn');
+            try {
+                if (state.cameraStream) {
+                    state.cameraStream.getTracks().forEach(track => track.stop());
+                }
+                state.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = state.cameraStream;
+                
+                video.onloadedmetadata = () => {
+                    video.play();
+                    video.classList.remove('hidden');
+                    photoPreview.classList.add('hidden');
+                    captureBtn.disabled = false;
+                };
+
+            } catch (err) {
+                console.error("Camera Error:", err);
+                showModal('error', 'Camera Error', 'Could not access the camera. Please grant permission or check if another app is using it.');
             }
+        };
 
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
+        const capturePhoto = () => {
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.getElementById('photoCanvas');
+            const photoPreview = document.getElementById('photoPreview');
             const context = canvas.getContext('2d');
-            
-            if (!video.videoWidth) {
-                showNotification('Please start camera first', 'error');
-                return;
-            }
-            
+
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0);
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
-            
-            document.getElementById('photoPreview').innerHTML = `
-                <p style="color: #059669; font-weight: 600; margin-bottom: 8px;">📷 Photo captured successfully</p>
-                <img src="${capturedPhoto}" alt="Captured photo">
-            `;
-            
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
+            const dataUrl = canvas.toDataURL('image/png');
+            photoPreview.src = dataUrl;
+            state.capturedPhotoBlob = dataURLtoBlob(dataUrl);
 
-            updateSubmitButton();
-            showNotification('Photo captured successfully!');
-        }
+            video.classList.add('hidden');
+            photoPreview.classList.remove('hidden');
+            state.cameraStream.getTracks().forEach(track => track.stop());
+            document.getElementById('capture-photo-btn').disabled = true;
+            validateFormCompletion();
+        };
 
-        function updateSubmitButton() {
-            const submitBtn = document.getElementById('submitBtn');
-            const hasLocation = locationGranted && currentLocation;
-            const hasPhoto = capturedPhoto !== null;
-            
-            if (hasLocation && hasPhoto) {
+        const validateFormCompletion = () => {
+            const submitBtn = document.getElementById('submit-visit-btn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            if (state.userLocation && state.capturedPhotoBlob) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Visit';
-                submitBtn.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+                btnText.textContent = 'Submit Visit';
             } else {
                 submitBtn.disabled = true;
-                if (!hasLocation) {
-                    submitBtn.textContent = 'Location Required';
-                    submitBtn.style.background = '#f59e0b';
-                } else if (!hasPhoto) {
-                    submitBtn.textContent = 'Photo Required';
-                    submitBtn.style.background = '#f59e0b';
-                }
+                let message = 'Required:';
+                if (!state.userLocation) message += ' Location';
+                if (!state.capturedPhotoBlob) message += ' Photo';
+                btnText.textContent = message;
             }
-        }
+        };
 
-        document.getElementById('visitForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (!locationGranted || !currentLocation) {
-                showNotification('Location is required to submit visit', 'error');
+        const fetchPartnerStats = async () => {
+            const { count: totalCount } = await supabaseClient
+                .from('visits')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', state.currentUser.id);
+
+            const today = new Date().toISOString().slice(0, 10);
+            const { count: todayCount } = await supabaseClient
+                .from('visits')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', state.currentUser.id)
+                .gte('created_at', `${today}T00:00:00.000Z`)
+                .lte('created_at', `${today}T23:59:59.999Z`);
+
+            const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+            const { count: editableCount } = await supabaseClient
+                .from('visits')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', state.currentUser.id)
+                .gte('created_at', twoHoursAgo);
+
+            document.getElementById('total-visits-partner').textContent = totalCount || 0;
+            document.getElementById('today-visits-partner').textContent = todayCount || 0;
+            document.getElementById('editable-visits-partner').textContent = editableCount || 0;
+        };
+        
+        const fetchPartnerVisits = async () => {
+            const { data, error } = await supabaseClient
+                .from('visits')
+                .select('*')
+                .eq('user_id', state.currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (error) return;
+
+            const tableBody = document.getElementById('partner-visits-table');
+            tableBody.innerHTML = '';
+            const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">You haven't submitted any visits yet.</td></tr>`;
                 return;
             }
-            
-            if (!capturedPhoto) {
-                showNotification('Photo is required to submit visit', 'error');
-                return;
-            }
 
-            showLoading('Submitting visit...');
-            
-            setTimeout(() => {
-                const visit = {
-                    id: Date.now(),
-                    partner: currentUser.username,
-                    date: new Date().toISOString(),
-                    personName: document.getElementById('personName').value.trim(),
-                    mobileNumber: document.getElementById('mobileNumber').value.trim(),
-                    companyName: document.getElementById('companyName').value.trim(),
-                    designation: document.getElementById('designation').value.trim(),
-                    meetingPurpose: document.getElementById('meetingPurpose').value.trim(),
-                    location: currentLocation,
-                    photo: capturedPhoto,
-                    createdAt: new Date()
-                };
-                
-                visits.push(visit);
-                
-                // Update partner stats
-                const partner = partners.find(p => p.username === currentUser.username);
-                if (partner) {
-                    partner.totalVisits = visits.filter(v => v.partner === currentUser.username).length;
-                    partner.lastActivity = new Date().toISOString();
-                }
-                
-                // Save to storage immediately
-                saveToStorage();
-                
-                // Reset form
-                this.reset();
-                document.getElementById('photoPreview').innerHTML = '';
-                capturedPhoto = null;
-                updateSubmitButton();
-                
-                updateStats();
-                renderTables();
-                hideLoading();
-                showNotification('Visit submitted successfully and saved!');
-            }, 1500);
-        });
-
-        function updateStats() {
-            const today = new Date().toDateString();
-            const todayVisits = visits.filter(v => new Date(v.date).toDateString() === today);
-            
-            if (userRole === 'partner') {
-                const userVisits = visits.filter(v => v.partner === currentUser.username);
-                const editableVisits = userVisits.filter(v => canEdit(v.createdAt));
-                
-                document.getElementById('totalVisits').textContent = userVisits.length;
-                document.getElementById('todayVisits').textContent = todayVisits.filter(v => v.partner === currentUser.username).length;
-                document.getElementById('editableCount').textContent = editableVisits.length;
-            } else if (userRole === 'admin') {
-                const uniqueCompanies = [...new Set(visits.map(v => v.companyName))];
-                
-                document.getElementById('adminTotalVisits').textContent = visits.length;
-                document.getElementById('adminTotalPartners').textContent = partners.length;
-                document.getElementById('adminTodayVisits').textContent = todayVisits.length;
-                document.getElementById('adminCompanies').textContent = uniqueCompanies.length;
-            }
-        }
-
-        function canEdit(createdAt) {
-            const now = new Date();
-            const created = new Date(createdAt);
-            const diffHours = (now - created) / (1000 * 60 * 60);
-            return diffHours <= 2;
-        }
-
-        function renderTables() {
-            if (userRole === 'partner') {
-                renderPartnerVisits();
-            } else if (userRole === 'admin') {
-                renderAdminTables();
-            }
-        }
-
-        function renderPartnerVisits() {
-            const userVisits = visits.filter(v => v.partner === currentUser.username);
-            const tbody = document.getElementById('partnerVisitsTable');
-            
-            if (userVisits.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">
-                            No visits recorded yet. Create your first visit above!
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = userVisits.map(visit => `
-                <tr>
-                    <td>${new Date(visit.date).toLocaleDateString()}</td>
-                    <td>${visit.personName}</td>
-                    <td>${visit.mobileNumber}</td>
-                    <td>${visit.companyName}</td>
-                    <td id="partner-location-${visit.id}">
-                        ${visit.location ? `${visit.location.lat.toFixed(3)}, ${visit.location.lng.toFixed(3)}` : 'N/A'}
-                    </td>
-                    <td>
-                        <span class="status-badge ${canEdit(visit.createdAt) ? 'status-editable' : 'status-locked'}">
-                            ${canEdit(visit.createdAt) ? 'Editable' : 'Locked'}
+            data.forEach(visit => {
+                const isEditable = new Date(visit.created_at) > twoHoursAgo;
+                const row = document.createElement('tr');
+                row.className = 'text-sm text-gray-700';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(visit.created_at).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${visit.person_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${visit.company_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="${isEditable ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                            ${isEditable ? 'Editable' : 'Locked'}
                         </span>
                     </td>
-                    <td>
-                        ${canEdit(visit.createdAt) ? 
-                            `<button class="btn-small btn-edit" onclick="editVisit(${visit.id})">Edit</button>` : 
-                            '<span style="color: #9ca3af;">-</span>'
-                        }
-                        <button class="btn-small btn-view" onclick="viewPhoto(${visit.id})">View Photo</button>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button data-id="${visit.id}" class="edit-visit-btn-partner text-indigo-600 hover:text-indigo-900 font-medium ${!isEditable ? 'opacity-50 cursor-not-allowed' : ''}" ${!isEditable ? 'disabled' : ''}>Edit</button>
                     </td>
-                </tr>
-            `).join('');
-
-            // Load location names
-            userVisits.forEach(visit => {
-                if (visit.location) {
-                    getLocationName(visit.location.lat, visit.location.lng, `partner-location-${visit.id}`);
-                }
+                `;
+                tableBody.appendChild(row);
             });
-        }
-
-        function renderAdminTables() {
-            // Render partners table
-            const partnersTable = document.getElementById('partnersTable');
             
-            if (partners.length === 0) {
-                partnersTable.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #64748b; padding: 20px;">
-                            No partners registered yet.
+            document.querySelectorAll('.edit-visit-btn-partner').forEach(button => {
+                button.addEventListener('click', (e) => openEditModal(e.target.dataset.id));
+            });
+        };
+
+        document.getElementById('visit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-visit-btn');
+            setButtonLoading(submitBtn, true);
+
+            const fileName = `${state.currentUser.id}/${Date.now()}.png`;
+            const { error: fileError } = await supabaseClient.storage
+                .from('visit-photos')
+                .upload(fileName, state.capturedPhotoBlob);
+
+            if (fileError) {
+                showModal('error', 'Upload Error', 'Failed to upload photo.');
+                setButtonLoading(submitBtn, false);
+                return;
+            }
+
+            const { data: urlData } = supabaseClient.storage.from('visit-photos').getPublicUrl(fileName);
+
+            const visitData = {
+                user_id: state.currentUser.id,
+                username: state.userProfile.username,
+                person_name: document.getElementById('person-name').value,
+                mobile_number: document.getElementById('mobile-number').value,
+                company_name: document.getElementById('company-name').value,
+                designation: document.getElementById('designation').value,
+                meeting_purpose: document.getElementById('meeting-purpose').value,
+                latitude: state.userLocation.latitude,
+                longitude: state.userLocation.longitude,
+                photo_url: urlData.publicUrl,
+            };
+
+            const { error: insertError } = await supabaseClient.from('visits').insert([visitData]);
+
+            if (insertError) {
+                showModal('error', 'Database Error', 'Failed to save visit data. ' + insertError.message);
+            } else {
+                showModal('success', 'Success!', 'Visit has been successfully submitted.');
+                document.getElementById('visit-form').reset();
+                state.capturedPhotoBlob = null;
+                document.getElementById('photoPreview').src = 'https://placehold.co/250x188/e2e8f0/cbd5e0?text=Photo+Required';
+                validateFormCompletion();
+                await fetchPartnerStats();
+                await fetchPartnerVisits();
+            }
+            setButtonLoading(submitBtn, false);
+        });
+
+        // =====================================================================================
+        // ADMIN DASHBOARD LOGIC
+        // =====================================================================================
+        
+        const loadAdminDashboard = async () => {
+            showPage('admin');
+            const [visits, partners] = await Promise.all([fetchAllVisits(), fetchAllPartners()]);
+            state.allVisitsData = visits;
+            state.allPartnersData = partners;
+            
+            renderAdminStats(visits, partners);
+            renderPartnersTable(partners, visits);
+            renderVisitsTable(visits);
+            populatePartnerFilter(partners);
+            addAdminTableEventListeners();
+        };
+
+        const fetchAllVisits = async () => {
+            const { data, error } = await supabaseClient.from('visits').select('*').order('created_at', { ascending: false });
+            return error ? [] : data;
+        };
+
+        const fetchAllPartners = async () => {
+            const { data, error } = await supabaseClient.from('profiles').select('*');
+            return error ? [] : data;
+        };
+
+        const renderAdminStats = (visits, partners) => {
+            document.getElementById('total-visits-admin').textContent = visits.length;
+            document.getElementById('total-partners-admin').textContent = partners.length;
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('today-visits-admin').textContent = visits.filter(v => v.created_at.startsWith(today)).length;
+            const uniqueCompanies = new Set(visits.map(v => v.company_name));
+            document.getElementById('total-companies-admin').textContent = uniqueCompanies.size;
+        };
+
+        const renderPartnersTable = (partners, visits) => {
+            const tableBody = document.getElementById('admin-partners-table');
+            tableBody.innerHTML = '';
+            partners.forEach(partner => {
+                const partnerVisits = visits.filter(v => v.user_id === partner.id);
+                const lastActivity = partnerVisits.length > 0 ? new Date(partnerVisits.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0].created_at).toLocaleDateString() : 'N/A';
+                const row = `
+                    <tr class="text-sm text-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap">${partner.username || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${new Date(partner.updated_at).toLocaleDateString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${partnerVisits.length}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${lastActivity}</td>
+                        <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                           <button data-username="${partner.username}" class="view-partner-visits-btn text-blue-600 hover:text-blue-900 font-medium">View</button>
+                           <button data-username="${partner.username}" class="export-partner-visits-btn text-green-600 hover:text-green-900 font-medium">Export</button>
                         </td>
                     </tr>
                 `;
-            } else {
-                partnersTable.innerHTML = partners.map(partner => `
-                    <tr>
-                        <td>${partner.username}</td>
-                        <td>${new Date(partner.registrationDate).toLocaleDateString()}</td>
-                        <td>${partner.totalVisits}</td>
-                        <td>${new Date(partner.lastActivity).toLocaleDateString()}</td>
-                        <td>
-                            <button class="btn-small btn-view" onclick="viewPartnerVisits('${partner.username}')">View Visits</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+                tableBody.innerHTML += row;
+            });
+        };
 
-            // Render all visits table
-            const visitsTable = document.getElementById('adminVisitsTable');
-            
+        const renderVisitsTable = (visits) => {
+            state.renderedVisits = visits; // Store for export
+            const tableBody = document.getElementById('admin-visits-table');
+            tableBody.innerHTML = '';
             if (visits.length === 0) {
-                visitsTable.innerHTML = `
-                    <tr>
-                        <td colspan="9" style="text-align: center; color: #64748b; padding: 20px;">
-                            No visits recorded yet.
-                        </td>
-                    </tr>
-                `;
-            } else {
-                visitsTable.innerHTML = visits.map(visit => `
-                    <tr>
-                        <td>${visit.partner}</td>
-                        <td>${new Date(visit.date).toLocaleDateString()}</td>
-                        <td>${visit.personName}</td>
-                        <td>${visit.mobileNumber}</td>
-                        <td>${visit.companyName}</td>
-                        <td>${visit.designation}</td>
-                        <td id="admin-location-${visit.id}">
-                            ${visit.location ? `${visit.location.lat.toFixed(3)}, ${visit.location.lng.toFixed(3)}` : 'N/A'}
-                        </td>
-                        <td>
-                            <button class="btn-small btn-view" onclick="viewPhoto(${visit.id})">View</button>
-                        </td>
-                        <td>
-                            <button class="btn-small btn-edit" onclick="editVisit(${visit.id})">Edit</button>
-                            <button class="btn-small btn-delete" onclick="deleteVisit(${visit.id})">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-
-                // Load location names for admin table
-                visits.forEach(visit => {
-                    if (visit.location) {
-                        getLocationName(visit.location.lat, visit.location.lng, `admin-location-${visit.id}`);
-                    }
-                });
-            }
-        }
-
-        // Function to get location name from coordinates
-        function getLocationName(lat, lng, elementId) {
-            // Using a free reverse geocoding service
-            fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
-                .then(response => response.json())
-                .then(data => {
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        const locationName = data.city || data.locality || data.principalSubdivision || 'Unknown Area';
-                        const country = data.countryName || '';
-                        element.innerHTML = `
-                            <div style="font-weight: 600; color: #059669;">${locationName}</div>
-                            <div style="font-size: 0.7rem; color: #6b7280;">${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
-                            ${country ? `<div style="font-size: 0.65rem; color: #9ca3af;">${country}</div>` : ''}
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.log('Geocoding failed:', error);
-                    // Fallback to coordinates only
-                });
-        }
-
-        function editVisit(id) {
-            const visit = visits.find(v => v.id === id);
-            if (!visit) return;
-            
-            if (userRole === 'partner' && !canEdit(visit.createdAt)) {
-                showNotification('Can only edit within 2 hours of creation', 'error');
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">No visits found.</td></tr>';
                 return;
             }
-            
-            // Create edit modal
-            const modal = document.createElement('div');
-            modal.id = 'editVisitModal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-                padding: 20px;
-            `;
-            
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                    <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 20px; display: flex; align-items: center; gap: 16px;">
-                        ${isMobileDevice() ? `<button onclick="closeEditModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; cursor: pointer;">←</button>` : ''}
-                        <div style="flex: 1; text-align: ${isMobileDevice() ? 'left' : 'center'};">
-                            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700;">Edit Visit Details</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 0.9rem;">Update visit information</p>
-                        </div>
-                    </div>
-                    <form id="editVisitForm" style="padding: 24px;">
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Mobile Number</label>
-                            <input type="tel" id="editMobileNumber" value="${visit.mobileNumber}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Company Name</label>
-                            <input type="text" id="editCompanyName" value="${visit.companyName}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Designation</label>
-                            <input type="text" id="editDesignation" value="${visit.designation}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Meeting Purpose</label>
-                            <textarea id="editMeetingPurpose" rows="3" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; resize: vertical;">${visit.meetingPurpose || ''}</textarea>
-                        </div>
-                        
-                        <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
-                            <button type="button" onclick="closeEditModal()" style="background: #6b7280; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; flex: ${isMobileDevice() ? '1' : 'none'};">Cancel</button>
-                            <button type="submit" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; flex: ${isMobileDevice() ? '1' : 'none'};">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
-            `;
-            
-            modal.onclick = (e) => {
-                if (e.target === modal) closeEditModal();
-            };
-            
-            document.body.appendChild(modal);
-            
-            // Add mobile navigation if on mobile
-            if (isMobileDevice()) {
-                pushNavigation('Edit Visit', closeEditModal);
-            }
-            
-            // Handle form submission
-            document.getElementById('editVisitForm').onsubmit = function(e) {
-                e.preventDefault();
-                
-                const newPersonName = document.getElementById('editPersonName').value.trim();
-                const newMobileNumber = document.getElementById('editMobileNumber').value.trim();
-                const newCompanyName = document.getElementById('editCompanyName').value.trim();
-                const newDesignation = document.getElementById('editDesignation').value.trim();
-                const newMeetingPurpose = document.getElementById('editMeetingPurpose').value.trim();
-                
-                if (!newPersonName || !newMobileNumber || !newCompanyName || !newDesignation) {
-                    showNotification('Please fill in all required fields', 'error');
-                    return;
-                }
-                
-                // Validate mobile number format
-                const mobileRegex = /^[+]?[0-9\s\-\(\)]{10,}$/;
-                if (!mobileRegex.test(newMobileNumber)) {
-                    showNotification('Please enter a valid mobile number', 'error');
-                    return;
-                }
-                
-                // Update visit
-                visit.personName = newPersonName;
-                visit.mobileNumber = newMobileNumber;
-                visit.companyName = newCompanyName;
-                visit.designation = newDesignation;
-                visit.meetingPurpose = newMeetingPurpose;
-                visit.lastModified = new Date().toISOString();
-                
-                // Save changes immediately
-                saveToStorage();
-                
-                closeEditModal();
-                renderTables();
-                updateStats();
-                showNotification('Visit updated and saved successfully!');
-            };
-        }
-
-        function closeEditModal() {
-            const modal = document.getElementById('editVisitModal');
-            if (modal) {
-                modal.remove();
-            }
-            if (isMobileDevice()) {
-                popNavigation();
-            }
-        }
-
-        function deleteVisit(id) {
-            if (userRole !== 'admin') return;
-            
-            if (confirm('Are you sure you want to delete this visit?')) {
-                visits = visits.filter(v => v.id !== id);
-                
-                // Update partner stats
-                partners.forEach(partner => {
-                    partner.totalVisits = visits.filter(v => v.partner === partner.username).length;
-                });
-                
-                // Save changes immediately
-                saveToStorage();
-                
-                renderTables();
-                updateStats();
-                showNotification('Visit deleted and saved successfully!');
-            }
-        }
-
-        function viewPhoto(id) {
-            const visit = visits.find(v => v.id === id);
-            if (visit && visit.photo) {
-                const modal = document.createElement('div');
-                modal.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0, 0, 0, 0.9);
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    z-index: 10000;
-                    cursor: pointer;
-                    padding: 20px;
-                `;
-                
-                modal.innerHTML = `
-                    <div style="text-align: center; max-width: 90%; max-height: 90%;">
-                        <h3 style="color: white; margin-bottom: 16px; font-size: 1.2rem;">${visit.personName} - ${visit.companyName}</h3>
-                        <img src="${visit.photo}" style="max-width: 100%; max-height: 70vh; border-radius: 12px; border: 3px solid white; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
-                        <p style="color: #d1d5db; margin-top: 12px; font-size: 0.9rem;">📱 Tap anywhere to close</p>
-                    </div>
-                `;
-                
-                modal.onclick = () => document.body.removeChild(modal);
-                document.body.appendChild(modal);
-            }
-        }
-
-        function viewPartnerVisits(username) {
-            const partnerVisits = visits.filter(v => v.partner === username);
-            
-            if (partnerVisits.length === 0) {
-                showNotification(`No visits found for ${username}`, 'warning');
-                return;
-            }
-
-            const modal = document.createElement('div');
-            modal.id = 'partnerVisitsModal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-                padding: 20px;
-            `;
-            
-            // Create the table rows separately to ensure template literals are processed
-            const tableRows = partnerVisits.map(visit => {
-                const visitDate = new Date(visit.date).toLocaleDateString();
-                const locationText = visit.location ? 
-                    `${visit.location.lat.toFixed(4)}, ${visit.location.lng.toFixed(4)}` : 
-                    'N/A';
-                    
-                return `
-                    <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td style="padding: 12px 8px; font-size: 0.85rem;">${visitDate}</td>
-                        <td style="padding: 12px 8px; font-weight: 600; font-size: 0.85rem;">${visit.personName}</td>
-                        <td style="padding: 12px 8px; font-size: 0.85rem;">${visit.companyName}</td>
-                        <td style="padding: 12px 8px; font-size: 0.85rem;">${visit.mobileNumber}</td>
-                        <td style="padding: 12px 8px; font-size: 0.75rem;" id="location-${visit.id}">
-                            ${locationText}
-                        </td>
-                        <td style="padding: 12px 8px;">
-                            <button class="btn-small btn-view" onclick="viewPhoto(${visit.id})" style="font-size: 0.7rem; padding: 4px 8px;">Photo</button>
-                            <button class="btn-small btn-edit" onclick="editVisit(${visit.id})" style="font-size: 0.7rem; padding: 4px 8px;">Edit</button>
+            visits.forEach(visit => {
+                const row = `
+                    <tr class="text-sm text-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap">${visit.username}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${new Date(visit.created_at).toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${visit.person_name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${visit.mobile_number}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${visit.company_name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${visit.latitude.toFixed(4)}, ${visit.longitude.toFixed(4)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap"><button data-photo-url="${visit.photo_url}" class="view-photo-btn text-indigo-600 hover:underline">View Photo</button></td>
+                        <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                            <button data-id="${visit.id}" class="edit-visit-btn-admin text-indigo-600 hover:text-indigo-900 font-medium">Edit</button>
+                            <button data-id="${visit.id}" class="delete-visit-btn-admin text-red-600 hover:text-red-900 font-medium">Delete</button>
                         </td>
                     </tr>
                 `;
-            }).join('');
-            
-            const backButtonHtml = isMobileDevice() ? 
-                `<button onclick="closePartnerVisitsModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; cursor: pointer;">←</button>` : 
-                '';
-            
-            const titleAlignment = isMobileDevice() ? 'left' : 'center';
-            
-            const closeButtonHtml = !isMobileDevice() ? `
-                <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
-                    <button onclick="closePartnerVisitsModal()" style="background: #6b7280; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">Close</button>
-                </div>
-            ` : '';
-            
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 16px; max-width: 90%; max-height: 90%; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 800px;">
-                    <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 20px; display: flex; align-items: center; gap: 16px;">
-                        ${backButtonHtml}
-                        <div style="flex: 1; text-align: ${titleAlignment};">
-                            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700;">Visits by ${username}</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 0.9rem;">${partnerVisits.length} total visits</p>
-                        </div>
-                    </div>
-                    <div style="padding: 20px; max-height: 60vh; overflow-y: auto;">
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
-                                <thead>
-                                    <tr style="background: #f8fafc;">
-                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Date</th>
-                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Person</th>
-                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Company</th>
-                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Mobile</th>
-                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Location</th>
-                                        <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; font-size: 0.85rem;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${tableRows}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    ${closeButtonHtml}
-                </div>
-            `;
-            
-            modal.onclick = (e) => {
-                if (e.target === modal) closePartnerVisitsModal();
-            };
-            
-            document.body.appendChild(modal);
-            
-            // Add mobile navigation if on mobile
-            if (isMobileDevice()) {
-                pushNavigation(`${username} Visits`, closePartnerVisitsModal);
-            }
-            
-            // Load location names for each visit
-            partnerVisits.forEach(visit => {
-                if (visit.location) {
-                    getLocationName(visit.location.lat, visit.location.lng, `location-${visit.id}`);
+                tableBody.innerHTML += row;
+            });
+        };
+        
+        const deleteVisit = async (visitId) => {
+            showModal('confirm', 'Delete Visit', 'Are you sure you want to permanently delete this visit? This action cannot be undone.', async () => {
+                const { error } = await supabaseClient.from('visits').delete().eq('id', visitId);
+                if (error) {
+                    showModal('error', 'Error', 'Failed to delete visit.');
+                } else {
+                    showModal('success', 'Success', 'Visit deleted successfully.');
+                    loadAdminDashboard();
                 }
             });
-        }
+        };
 
-        function closePartnerVisitsModal() {
-            const modal = document.getElementById('partnerVisitsModal');
-            if (modal) {
-                modal.remove();
-            }
-            if (isMobileDevice()) {
-                popNavigation();
-            }
-        }
+        // =====================================================================================
+        // MODAL & EVENT LISTENERS
+        // =====================================================================================
+        
+        const editModal = document.getElementById('edit-modal');
+        
+        const openEditModal = async (visitId) => {
+            const { data, error } = await supabaseClient.from('visits').select('*').eq('id', visitId).single();
+            if (error) return;
 
-        // Initialize the application
-        window.addEventListener('load', function() {
-            // Load data from storage first
-            const dataLoaded = loadFromStorage();
+            document.getElementById('edit-visit-id').value = data.id;
+            document.getElementById('edit-person-name').value = data.person_name;
+            document.getElementById('edit-mobile-number').value = data.mobile_number;
+            document.getElementById('edit-company-name').value = data.company_name;
+            document.getElementById('edit-designation').value = data.designation;
+            document.getElementById('edit-meeting-purpose').value = data.meeting_purpose;
             
-            if (dataLoaded) {
-                showNotification(`Loaded ${visits.length} visits and ${partners.length} partners from storage`, 'success');
+            editModal.classList.remove('hidden');
+        };
+
+        const closeEditModal = () => {
+            editModal.classList.add('hidden');
+            document.getElementById('edit-visit-form').reset();
+        };
+
+        document.getElementById('save-edit-btn').addEventListener('click', async () => {
+            const visitId = document.getElementById('edit-visit-id').value;
+            const updatedData = {
+                person_name: document.getElementById('edit-person-name').value,
+                mobile_number: document.getElementById('edit-mobile-number').value,
+                company_name: document.getElementById('edit-company-name').value,
+                designation: document.getElementById('edit-designation').value,
+                meeting_purpose: document.getElementById('edit-meeting-purpose').value,
+            };
+
+            const { error } = await supabaseClient.from('visits').update(updatedData).eq('id', visitId);
+
+            if (error) {
+                showModal('error', 'Error', 'Failed to update visit.');
             } else {
-                showNotification('Starting fresh - no previous data found', 'success');
-            }
-            
-            updateStats();
-            renderTables();
-            
-            // Check for location permission status
-            if ('permissions' in navigator) {
-                navigator.permissions.query({name: 'geolocation'}).then(function(result) {
-                    if (result.state === 'granted') {
-                        console.log('Location permission already granted');
-                    } else if (result.state === 'prompt') {
-                        console.log('Location permission will be requested');
-                    } else {
-                        console.log('Location permission denied');
-                    }
-                });
-            }
-        });
-
-        // Auto-save data periodically (every 30 seconds)
-        setInterval(() => {
-            if (visits.length > 0 || partners.length > 0) {
-                saveToStorage();
-                console.log('Auto-saved data');
-            }
-        }, 30000);
-
-        // Save data before page unload
-        window.addEventListener('beforeunload', function() {
-            saveToStorage();
-        });
-
-        // Handle orientation change on mobile
-        window.addEventListener('orientationchange', function() {
-            setTimeout(updateStats, 100);
-        });
-
-        // Handle back button for mobile
-        window.addEventListener('popstate', function(event) {
-            if (userRole) {
-                event.preventDefault();
-                if (confirm('Are you sure you want to logout? All data is saved.')) {
-                    logout();
+                showModal('success', 'Success', 'Visit updated successfully.');
+                closeEditModal();
+                if (state.userProfile.role === 'admin') {
+                    loadAdminDashboard();
+                } else {
+                    fetchPartnerVisits();
                 }
             }
         });
+
+        const populatePartnerFilter = (partners) => {
+            const filterSelect = document.getElementById('partner-filter');
+            if (!filterSelect) return;
+            filterSelect.innerHTML = `<option value="">All Partners</option>`;
+            partners.forEach(partner => {
+                if (partner.username) {
+                    const option = document.createElement('option');
+                    option.value = partner.username;
+                    option.textContent = partner.username;
+                    filterSelect.appendChild(option);
+                }
+            });
+        };
+
+        const addAdminTableEventListeners = () => {
+            document.getElementById('admin-dashboard').addEventListener('click', (e) => {
+                if (e.target.classList.contains('view-partner-visits-btn')) {
+                    const username = e.target.dataset.username;
+                    const partnerVisits = state.allVisitsData.filter(v => v.username === username);
+                    renderVisitsTable(partnerVisits);
+                    document.getElementById('all-visits-header').textContent = `Visits by ${username}`;
+                    document.getElementById('show-all-visits-btn').classList.remove('hidden');
+                }
+                if (e.target.classList.contains('export-partner-visits-btn')) {
+                    const username = e.target.dataset.username;
+                    const partnerVisits = state.allVisitsData.filter(v => v.username === username);
+                    exportToExcel(partnerVisits, `visits_${username}`);
+                }
+                if (e.target.classList.contains('view-photo-btn')) {
+                    const photoModal = document.getElementById('photo-modal');
+                    const photoImg = document.getElementById('photo-modal-img');
+                    photoImg.src = e.target.dataset.photoUrl;
+                    photoModal.classList.remove('hidden');
+                }
+                if (e.target.classList.contains('edit-visit-btn-admin')) {
+                    openEditModal(e.target.dataset.id);
+                }
+                if (e.target.classList.contains('delete-visit-btn-admin')) {
+                    deleteVisit(e.target.dataset.id);
+                }
+            });
+        };
+
+        // =====================================================================================
+        // INITIALIZATION & GLOBAL EVENT LISTENERS
+        // =====================================================================================
+        
+        const initializeApp = async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                state.currentUser = session.user;
+                await fetchUserProfile();
+                if (state.userProfile && state.userProfile.role === 'admin') {
+                    await loadAdminDashboard();
+                } else {
+                    await loadPartnerDashboard();
+                }
+            } else {
+                showPage('auth');
+            }
+        };
+
+        // Auth form toggling
+        const partnerFormContainer = document.getElementById('partner-form-container');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const partnerTab = document.getElementById('partner-tab');
+        const adminTab = document.getElementById('admin-tab');
+
+        partnerTab.addEventListener('click', () => {
+            partnerTab.classList.add('bg-indigo-600', 'text-white', 'shadow');
+            partnerTab.classList.remove('text-gray-600');
+            adminTab.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+            adminTab.classList.add('text-gray-600');
+            partnerFormContainer.classList.remove('hidden');
+            adminLoginForm.classList.add('hidden');
+            DOM.authError.textContent = '';
+        });
+
+        adminTab.addEventListener('click', () => {
+            adminTab.classList.add('bg-indigo-600', 'text-white', 'shadow');
+            adminTab.classList.remove('text-gray-600');
+            partnerTab.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+            partnerTab.classList.add('text-gray-600');
+            adminLoginForm.classList.remove('hidden');
+            partnerFormContainer.classList.add('hidden');
+            DOM.authError.textContent = '';
+        });
+        
+        document.getElementById('show-register-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('partner-login-form').classList.add('hidden');
+            document.getElementById('partner-register-form').classList.remove('hidden');
+            DOM.authError.textContent = '';
+        });
+
+        document.getElementById('show-login-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('partner-register-form').classList.add('hidden');
+            document.getElementById('partner-login-form').classList.remove('hidden');
+            DOM.authError.textContent = '';
+        });
+        
+        // Other global listeners
+        document.getElementById('logout-btn-partner').addEventListener('click', signOut);
+        document.getElementById('logout-btn-admin').addEventListener('click', signOut);
+        document.getElementById('start-camera-btn').addEventListener('click', startCamera);
+        document.getElementById('capture-photo-btn').addEventListener('click', capturePhoto);
+        document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
+        document.getElementById('register-username').addEventListener('input', debounce((e) => checkUsernameAvailability(e.target.value), 500));
+        document.getElementById('register-password').addEventListener('input', (e) => checkPasswordStrength(e.target.value));
+        document.getElementById('photo-modal-close').addEventListener('click', () => {
+            document.getElementById('photo-modal').classList.add('hidden');
+        });
+        document.getElementById('show-all-visits-btn').addEventListener('click', () => {
+            renderVisitsTable(state.allVisitsData);
+            document.getElementById('all-visits-header').textContent = 'All Visits';
+            document.getElementById('show-all-visits-btn').classList.add('hidden');
+        });
+        document.getElementById('export-partners-btn').addEventListener('click', () => {
+            const partnersData = state.allPartnersData.map(p => ({
+                Username: p.username,
+                'Full Name': p.full_name,
+                'Registration Date': new Date(p.updated_at).toLocaleDateString()
+            }));
+            exportToExcel(partnersData, 'all_partners');
+        });
+        document.getElementById('export-visits-btn').addEventListener('click', () => {
+            exportToExcel(state.renderedVisits, 'displayed_visits');
+        });
+        document.getElementById('filter-visits-btn').addEventListener('click', () => {
+            document.getElementById('filter-section').classList.toggle('hidden');
+        });
+        document.getElementById('apply-filters-btn').addEventListener('click', () => {
+            const startDate = document.getElementById('start-date-filter').value;
+            const endDate = document.getElementById('end-date-filter').value;
+            const partner = document.getElementById('partner-filter').value;
+            let filteredData = [...state.allVisitsData];
+            if (startDate) {
+                filteredData = filteredData.filter(v => v.created_at.slice(0, 10) >= startDate);
+            }
+            if (endDate) {
+                filteredData = filteredData.filter(v => v.created_at.slice(0, 10) <= endDate);
+            }
+            if (partner) {
+                filteredData = filteredData.filter(v => v.username === partner);
+            }
+            renderVisitsTable(filteredData);
+        });
+        document.getElementById('reset-filters-btn').addEventListener('click', () => {
+            document.getElementById('start-date-filter').value = '';
+            document.getElementById('end-date-filter').value = '';
+            document.getElementById('partner-filter').value = '';
+            renderVisitsTable(state.allVisitsData);
+        });
+
+        initializeApp();
+
     </script>
 </body>
-</html>;">
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 0.9rem;">Person Name</label>
-                            <input type="text" id="editPersonName" value="${visit.personName}" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" required>
-                        </div>
-                        <div style="margin-bottom: 16px
-                    <div class="stat-value" id="totalVisits">0</div>
-                    <div class="stat-label">Total Visits</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="todayVisits">0</div>
-                    <div class="stat-label">Today's Visits</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="editableCount">0</div>
-                    <div class="stat-label">Editable Visits</div>
-                </div>
-            </div>
+</html>
 
-            <div id="locationRequirement" class="location-requirement" style="display: none;">
-                📍 Location access is required to proceed. Please enable location sharing and refresh the page.
-            </div>
-
-            <div class="content-card" id="visitEntryCard">
-                <div class="card-header">New Visit Entry</div>
-                <div class="card-body">
-                    <div class="camera-section">
-                        <div class="video-container">
-                            <video id="video" autoplay muted playsinline></video>
-                            <canvas id="canvas"></canvas>
-                        </div>
-                        <div class="camera-controls">
-                            <button class="camera-btn btn-start" onclick="startCamera()">Start Camera</button>
-                            <button class="camera-btn btn-capture" onclick="capturePhoto()">Capture Photo</button>
-                        </div>
-                        <div class="photo-preview" id="photoPreview"></div>
-                    </div>
-
-                    <form id="visitForm">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Person Name</label>
-                                <input type="text" class="form-input" id="personName" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Mobile Number</label>
-                                <input type="tel" class="form-input" id="mobileNumber" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Company Name</label>
-                                <input type="text" class="form-input" id="companyName" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Designation</label>
-                                <input type="text" class="form-input" id="designation" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Meeting Purpose</label>
-                                <input type="text" class="form-input" id="meetingPurpose" placeholder="Brief description">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-submit" id="submitBtn" disabled>Submit Visit</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="content-card">
-                <div class="card-header">My Visits</div>
-                <div class="card-body">
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Person</th>
-                                    <th>Mobile</th>
-                                    <th>Company</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="partnerVisitsTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="dashboard" id="adminDashboard">
-        <nav class="navbar">
-            <div class="mobile-nav">
-                <button class="back-btn" id="adminBackBtn" onclick="handleBackNavigation()" style="display: none;">
-                    ← <span class="nav-title" id="adminNavTitle">Dashboard</span>
-                </button>
-                <div class="nav-brand">Admin Dashboard</div>
-            </div>
-            <div class="nav-user">
-                <div class="user-info">
-                    <span>Administrator</span>
-                </div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-        </nav>
-
-        <div class="main-content">
-            <div class="data-indicator">
-                💾 All data is automatically saved and persisted across sessions
-            </div>
-
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-value" id="adminTotalVisits">0</div>
-                    <div class="stat-label">Total Visits</div>
-                </div>
-                <div class="stat-card">
