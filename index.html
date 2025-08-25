@@ -164,7 +164,7 @@
                     </button>
                 </form>
                 <p id="auth-error" class="text-center text-sm text-red-500 mt-4"></p>
-                <p class="text-center text-xs text-gray-400 mt-6">v3.5</p>
+                <p class="text-center text-xs text-gray-400 mt-6">v3.6</p>
             </div>
         </section>
 
@@ -893,24 +893,42 @@
                     showModal('error', 'Geolocation Error', 'Geolocation is not supported by this browser.');
                     return resolve();
                 }
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        state.userLocation = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        };
-                        const geoInfo = document.getElementById('geo-info');
-                        geoInfo.innerHTML = `<svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> <span>${state.userLocation.latitude.toFixed(4)}, ${state.userLocation.longitude.toFixed(4)}</span>`;
-                        geoInfo.classList.remove('hidden');
-                        geoInfo.classList.add('flex');
-                        validateFormCompletion();
-                        resolve();
-                    },
-                    () => {
-                        showModal('error', 'Geolocation Error', 'Please enable location access to submit visits.');
-                        resolve();
-                    }
-                );
+
+                const handlePosition = (position) => {
+                    state.userLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    const geoInfo = document.getElementById('geo-info');
+                    geoInfo.innerHTML = `<svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> <span>${state.userLocation.latitude.toFixed(4)}, ${state.userLocation.longitude.toFixed(4)}</span>`;
+                    geoInfo.classList.remove('hidden');
+                    geoInfo.classList.add('flex');
+                    validateFormCompletion();
+                    resolve();
+                };
+
+                const handleError = (error) => {
+                    console.error("Geolocation error:", error.message);
+                    showModal('error', 'Geolocation Error', `Could not get location: ${error.message}`);
+                    resolve();
+                };
+
+                if (navigator.permissions && navigator.permissions.query) {
+                    navigator.permissions.query({ name: 'geolocation' }).then(result => {
+                        if (result.state === 'granted') {
+                            navigator.geolocation.getCurrentPosition(handlePosition, handleError);
+                        } else if (result.state === 'prompt') {
+                            navigator.geolocation.getCurrentPosition(handlePosition, handleError);
+                        } else if (result.state === 'denied') {
+                            showModal('error', 'Geolocation Denied', 'Please enable location permission in your browser/app settings.');
+                            resolve();
+                        }
+                    }).catch(err => {
+                        navigator.geolocation.getCurrentPosition(handlePosition, handleError);
+                    });
+                } else {
+                    navigator.geolocation.getCurrentPosition(handlePosition, handleError);
+                }
             });
         };
 
