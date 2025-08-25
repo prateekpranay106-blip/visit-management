@@ -164,7 +164,7 @@
                     </button>
                 </form>
                 <p id="auth-error" class="text-center text-sm text-red-500 mt-4"></p>
-                <p class="text-center text-xs text-gray-400 mt-6">v3.4</p>
+                <p class="text-center text-xs text-gray-400 mt-6">v3.5</p>
             </div>
         </section>
 
@@ -781,8 +781,11 @@
                 if (error) {
                     console.error("Login failed:", error.message);
                     DOM.authError.textContent = 'Invalid login credentials. Please try again.';
-                } 
-                // onAuthStateChange will handle successful login and redirect
+                } else if (data.user) {
+                    state.currentUser = data.user;
+                    await fetchUserProfile();
+                    await loadPartnerDashboard();
+                }
             } catch (err) {
                 console.error("Unexpected login error:", err);
                 DOM.authError.textContent = 'An unexpected error occurred. Please try again later.';
@@ -840,15 +843,13 @@
         };
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
-                if (state.currentUser?.id !== session.user.id) {
-                    state.currentUser = session.user;
-                    await fetchUserProfile();
-                    if (state.userProfile && state.userProfile.role === 'admin') {
-                        await loadAdminDashboard();
-                    } else {
-                        await loadPartnerDashboard();
-                    }
+            if (event === 'INITIAL_SESSION' && session?.user) {
+                state.currentUser = session.user;
+                await fetchUserProfile();
+                if (state.userProfile && state.userProfile.role === 'admin') {
+                    await loadAdminDashboard();
+                } else {
+                    await loadPartnerDashboard();
                 }
             } else if (event === 'SIGNED_OUT') {
                 state.currentUser = null;
